@@ -7,8 +7,7 @@ import six
 class BaseTuShare:
 
     def __init__(self):
-        self.__parameters = {"token": "592204bae01431106102416727abc9b4a40e56841722d3ab66c2a466"
-                             }
+        self.__parameters = {"token": "your tushare token here"}
 
     def set_parameter(self, parameter):
         if not isinstance(parameter, dict):
