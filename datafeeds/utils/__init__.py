@@ -14,7 +14,7 @@ class BarFeedConfig:
 
     @staticmethod
     def get_tushare():
-        config = {"token": "592204bae01431106102416727abc9b4a40e56841722d3ab66c2a466",
+        config = {"token": "",
                   "futureExchange": ["CFFEX", "DCE", "CZCE", "SHFE", "INE"],
                   "indexExchange": ["MSCI", "CSI", "SSE", "SZSE", "CICC", "SW", "OTH"],
                   "fundExchange": ["E", "O"],
@@ -26,19 +26,19 @@ class BarFeedConfig:
 
     @staticmethod
     def get_wind():
-        config = {"Server": "26.4.0.60",
-                  "Port": "1522",
-                  "DateBase": "wideaprd",
-                  "UserId": "ideawindprd_ro",
-                  "PassWord": "paic12345",
+        config = {"Server": "",
+                  "Port": "",
+                  "DateBase": "",
+                  "UserId": "",
+                  "PassWord": "",
                   "LimitNumbers": 1000
                   }
         return config
 
     @staticmethod
     def get_jqdata():
-        config = {"username": "18244236905",
-                  "password": "123456abc"
+        config = {"username": "",
+                  "password": ""
                   }
         return config
 
