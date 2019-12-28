@@ -13,6 +13,7 @@ from datafeeds import logger
 from datafeeds.winddatabasefeeds.stockfeedswinddatabase import AShareCalendarWindDataBase
 from datafeeds.tusharefeeds.stockfeedstushare import AShareCalendarTuShare
 from datafeeds.jqdatafeeds.stockfeedsjqdata import AShareCalendarJqData
+from datafeeds.windclientfeeds.stockfeedswindclient import AShareCalendarWindClient
 
 
 class AShareCalendar:
@@ -35,6 +36,8 @@ class AShareCalendar:
             data = AShareCalendarTuShare().get_calendar(begin_datetime=begin_datetime, end_datetime=end_datetime)
         elif dataSource == "jqdata":
             data = AShareCalendarJqData().get_calendar(begin_datetime=begin_datetime, end_datetime=end_datetime)
+        elif dataSource == "windclient":
+            data = AShareCalendarWindClient().get_calendar(begin_datetime=begin_datetime, end_datetime=end_datetime)
         else:
             raise BaseException("[%s] dataSource: %s can't supply now" % dataSource)
         data.loc[:, "dateSource"] = dataSource
