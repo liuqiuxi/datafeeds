@@ -50,11 +50,55 @@ class BarFeedConfig:
                   "console_log": True
                   }
         return config
-    
+
     @staticmethod
     def get_client_config():
-        config = {"AShareCalendar": "jqdata"}
+        config = {"AShareCalendar": "jqdata",
+                  "AShareQuotation": "wind",
+                  "AIndexQuotation": "wind",
+                  "AFutureQuotation": "wind",
+                  }
         return config
+
+    @staticmethod
+    def get_wind_database_items():
+        config = {"AShareQuotationWindDataBase": {"s_info_windcode": "securityId", "trade_dt": "dateTime",
+                                                  "s_dq_preclose": "preClose", "s_dq_open": "open", "s_dq_high": "high",
+                                                  "s_dq_low": "low", "s_dq_close": "close",
+                                                  "s_dq_change": "cash_change", "s_dq_pctchange": "Chg",
+                                                  "s_dq_volume": "volume", "s_dq_amount": "amount",
+                                                  "s_dq_avgprice": "avgPrice", "s_dq_adjfactor": "adjfactor",
+                                                  "s_dq_tradestatus": "tradeStatus"},
+
+                  "AIndexQuotationWindDataBase": {"s_info_windcode": "securityId", "trade_dt": "dateTime",
+                                                  "s_dq_preclose": "preClose", "s_dq_open": "open", "s_dq_high": "high",
+                                                  "s_dq_low": "low", "s_dq_close": "close",
+                                                  "s_dq_change": "cash_change", "s_dq_pctchange": "Chg",
+                                                  "s_dq_volume": "volume", "s_dq_amount": "amount"},
+
+                  "AFutureQuotationWindDataBase": {"s_info_windcode": "securityId", "trade_dt": "dateTime",
+                                                   "s_dq_presettle": "preSettle", "s_dq_open": "open",
+                                                   "s_dq_high": "high", "s_dq_low": "low", "s_dq_close": "close",
+                                                   "s_dq_settle": "settle", "s_dq_volume": "volume",
+                                                   "s_dq_amount": "amount", "s_dq_oi": "openInterest",
+                                                   "s_dq_change": "cash_change_close_to_settle",
+                                                   "s_dq_oichange": "openInterestChange"},
+
+                  "AOptionQuotationWindDataBase": {"s_info_windcode": "securityId", "trade_dt": "dateTime",
+                                                   "s_dq_open": "open", "s_dq_high": "high", "s_dq_low": "low",
+                                                   "s_dq_close": "close", "s_dq_settle": "settle",
+                                                   "s_dq_volume": "volume", "s_dq_amount": "amount",
+                                                   "s_dq_oi": "openInterest", "s_dq_oichange": "openInterestChange",
+                                                   "s_dq_presettle": "preSettle",
+                                                   "s_dq_change1": "cash_change_close_to_settle",
+                                                   "s_dq_change2": "cash_change_settle_to_settle"}
+
+
+                  }
+        return config
+
+
+
 
 
 

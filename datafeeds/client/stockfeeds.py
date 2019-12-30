@@ -14,6 +14,7 @@ from datafeeds.winddatabasefeeds.stockfeedswinddatabase import AShareCalendarWin
 from datafeeds.tusharefeeds.stockfeedstushare import AShareCalendarTuShare
 from datafeeds.jqdatafeeds.stockfeedsjqdata import AShareCalendarJqData
 from datafeeds.windclientfeeds.stockfeedswindclient import AShareCalendarWindClient
+from datafeeds.winddatabasefeeds.stockfeedswinddatabase import AShareQuotationWindDataBase
 
 
 class AShareCalendar:
@@ -45,6 +46,57 @@ class AShareCalendar:
         data.sort_values(by="dateTime", axis=0, ascending=True, inplace=True)
         data.reset_index(drop=True, inplace=True)
         return data
+
+
+class AShareQuotation:
+
+    @staticmethod
+    def get_quotation(securityIds, items, frequency, begin_datetime, end_datetime, adjusted="B", dataSource=None):
+        if not isinstance(securityIds, list):
+            raise BaseException("[AShareQuotation] securityIds must be list")
+        for securityId in securityIds:
+            if not isinstance(securityId, str):
+                raise BaseException("[AShareQuotation] securityId in securityIds must be str")
+        if not isinstance(items, list):
+            raise BaseException("[AShareQuotation] items must be list")
+        for item in items:
+            if not isinstance(item, str):
+                raise BaseException("[AShareQuotation] item in items must be str")
+        if not isinstance(begin_datetime, datetime.datetime):
+            raise BaseException("[AShareQuotation] begin_datetime must be datetime.datetime")
+        if not isinstance(end_datetime, datetime.datetime):
+            raise BaseException("[AShareQuotation] end_datetime must be datetime.datetime")
+        if begin_datetime > end_datetime:
+            raise BaseException("[AShareQuotation] begin_datetime must less than end_datetime")
+        if adjusted not in ["F", "B", None]:
+            raise BaseException("[AShareQuotation] adjusted only can in [F, B, None], not supply %s" % adjusted)
+        if dataSource is None:
+            log = logger.get_logger(name="AShareQuotation")
+            dataSource = BarFeedConfig.get_client_config().get("AShareQuotation")
+            log.info("dataSource did't allocated, so we use init config: %s" % dataSource)
+        if dataSource == "wind":
+            if frequency != 86400:
+                raise BaseException("[AShareQuotation] wind can not supply frequency: %d now" % frequency)
+            data = AShareQuotationWindDataBase().get_quotation(securityIds=securityIds, items=items,
+                                                               frequency=frequency, begin_datetime=begin_datetime,
+                                                               end_datetime=end_datetime, adjusted=adjusted)
+        else:
+            raise BaseException("[%s] dataSource: %s can't supply now" % dataSource)
+        data.loc[:, "dateSource"] = dataSource
+        data.sort_values(by=["securityId", "dateTime"], axis=0, ascending=True, inplace=True)
+        data.reset_index(drop=True, inplace=True)
+        return data
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-# @Time    : 2019/12/2811:15
+# @Time    : 2019-12-30 9:42
 # @Author  : liuqiuxi
 # @Email   : liuqiuxi1990@gmail.com
 # @File    : stockfeedswindclient.py
@@ -26,4 +26,3 @@ class AShareCalendarWindClient(BaseWindClient):
         data.sort_values(by="dateTime", axis=0, ascending=True, inplace=True)
         data.reset_index(drop=True, inplace=True)
         return data
-
