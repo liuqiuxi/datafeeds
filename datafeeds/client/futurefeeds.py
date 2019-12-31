@@ -47,7 +47,10 @@ class AFutureQuotation:
                                                                 end_datetime=end_datetime, adjusted=adjusted)
         else:
             raise BaseException("[%s] dataSource: %s can't supply now" % dataSource)
-        data.loc[:, "dateSource"] = dataSource
-        data.sort_values(by=["securityId", "dateTime"], axis=0, ascending=True, inplace=True)
-        data.reset_index(drop=True, inplace=True)
+        if not data.empty:
+            data.sort_values(by=["securityId", "dateTime"], axis=0, ascending=True, inplace=True)
+            data.reset_index(drop=True, inplace=True)
+            data.loc[:, "dateSource"] = dataSource
+        else:
+            log.warning("%s did't get data, please check it " % securityIds)
         return data

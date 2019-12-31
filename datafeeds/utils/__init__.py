@@ -57,6 +57,8 @@ class BarFeedConfig:
                   "AShareQuotation": "wind",
                   "AIndexQuotation": "wind",
                   "AFutureQuotation": "wind",
+                  "AOptionQuotation": "wind",
+                  "AFundQuotation": "wind"
                   }
         return config
 
@@ -91,9 +93,16 @@ class BarFeedConfig:
                                                    "s_dq_oi": "openInterest", "s_dq_oichange": "openInterestChange",
                                                    "s_dq_presettle": "preSettle",
                                                    "s_dq_change1": "cash_change_close_to_settle",
-                                                   "s_dq_change2": "cash_change_settle_to_settle"}
+                                                   "s_dq_change2": "cash_change_settle_to_settle"},
 
-
+                  "AFundQuotationWindDataBase": {"s_info_windcode": "securityId", "trade_dt": "dateTime",
+                                                 "s_dq_preclose": "preClose", "s_dq_open": "open", "s_dq_high": "high",
+                                                 "s_dq_low": "low", "s_dq_close": "close",
+                                                 "s_dq_change": "cash_change", "s_dq_pctchange": "Chg",
+                                                 "s_dq_volume": "volume", "s_dq_amount": "amount",
+                                                 "s_dq_adjfactor": "adjfactor", "f_info_windcode": "securityId",
+                                                 "price_date": "dateTime", "f_nav_unit": "close",
+                                                 "f_nav_adjfactor": "adjfactor"}
                   }
         return config
 

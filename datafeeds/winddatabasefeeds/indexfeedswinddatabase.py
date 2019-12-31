@@ -8,7 +8,6 @@
 # @Remark  : This is class of stock market
 
 import datetime
-import copy
 import pandas as pd
 from datafeeds.utils import BarFeedConfig
 from datafeeds.winddatabasefeeds import BaseWindDataBase
@@ -20,6 +19,7 @@ class AIndexQuotationWindDataBase(BaseWindDataBase):
 
     def __init__(self):
         super(AIndexQuotationWindDataBase, self).__init__()
+        self.__table_name_dict = {"AIndexQuotationWindDataBase": "AIndexEODPrices"}
 
     def get_quotation(self, securityIds, items, frequency, begin_datetime, end_datetime, adjusted=None):
         if adjusted is not None:
@@ -44,30 +44,17 @@ class AIndexQuotationWindDataBase(BaseWindDataBase):
         connect = self.connect()
         begin_datetime = begin_datetime.strftime("%Y%m%d")
         end_datetime = end_datetime.strftime("%Y%m%d")
-        sqlClause = "SELECT owner FROM all_tables WHERE table_name = 'AINDEXEODPRICES'"
-        owner = connect.execute(sqlClause).fetchone()
-        if owner is None:
-            raise BaseException("[%s] the AINDEXEODPRICES table do not exist" % self.LOGGER_NAME)
-        else:
-            owner = owner.values()[0] + "."
+        table_name = self.__table_name_dict.get(self.LOGGER_NAME)
+        owner = self.get_oracle_owner(table_name=table_name)
+        table_parameter = owner + table_name
         if frequency != 86400:
             raise BaseException("[%s] we can't supply frequency: %d " % (self.LOGGER_NAME, frequency))
         if len(securityIds) == 1:
-            sqlClause = ("select * from " + owner + "AIndexEODPrices where trade_dt >= '" + begin_datetime + "' and " +
+            sqlClause = ("select * from " + table_parameter + " where trade_dt >= '" + begin_datetime + "' and " +
                          "trade_dt <= '" + end_datetime + "' and s_info_windcode = '" + securityIds[0] + "'")
-            # sqlClause = ("select s_info_windcode as securityId, trade_dt as dateTime, s_dq_preclose as preClose, " +
-            #              "s_dq_open as open, s_dq_high as high, s_dq_low as low, s_dq_close as close, s_dq_change as " +
-            #              "cash_change, s_dq_pctchange as Chg, s_dq_volume as volume, s_dq_amount as amount " +
-            #              "from " + owner + "AIndexEODPrices where trade_dt >= '" + begin_datetime + "' and " +
-            #              "trade_dt <= '" + end_datetime + "' and s_info_windcode = '" + securityIds[0] + "'")
         else:
-            sqlClause = ("select * from " + owner + "AIndexEODPrices where trade_dt >= '" + begin_datetime + "' and " +
+            sqlClause = ("select * from " + table_parameter + " where trade_dt >= '" + begin_datetime + "' and " +
                          "trade_dt <= '" + end_datetime + "' and s_info_windcode in " + str(tuple(securityIds)) + "")
-            # sqlClause = ("select s_info_windcode as securityId, trade_dt as dateTime, s_dq_preclose as preClose, " +
-            #              "s_dq_open as open, s_dq_high as high, s_dq_low as low, s_dq_close as close, s_dq_change as " +
-            #              "cash_change, s_dq_pctchange as Chg, s_dq_volume as volume, s_dq_amount as amount " +
-            #              "from " + owner + "AIndexEODPrices where trade_dt >= '" + begin_datetime + "' and " +
-            #              "trade_dt <= '" + end_datetime + "' and s_info_windcode in " + str(tuple(securityIds)) + "")
         data = self.get_data_with_sql(sqlClause=sqlClause, connect=connect)
         rename_dict = BarFeedConfig.get_wind_database_items().get(self.LOGGER_NAME)
         data.rename(columns=rename_dict, inplace=True)
@@ -90,6 +77,51 @@ class AIndexQuotationWindDataBase(BaseWindDataBase):
         data = data.loc[:, ["dateTime", "securityId"] + real_items].copy(deep=True)
         connect.close()
         return data
+
+
+class AIndexWeightsWindDataBase(BaseWindDataBase):
+    LOGGER_NAME = "AIndexWeightsWindDataBase"
+
+    def __init__(self):
+        super(AIndexWeightsWindDataBase, self).__init__()
+        self.__rename_dict = {"s_con_windcode": "securityId", "trade_dt": "dateTime",
+                              "i_weight": "securityWeight", "weight": "securityWeight"}
+        self.__table_name_dict = {"000016.SH": "AIndexSSE50Weight", "000905.SH": "AIndexCSI500Weight",
+                                  "000906.SH": "AIndexCSI800Weight", "000300.SH": "AIndexHS300Weight"}
+
+    def get_index_weights(self, securityIds, date_datetime):
+        data = pd.DataFrame()
+        for securityId in securityIds:
+            data0 = self.__get_index_weights(securityId=securityId, date_datetime=date_datetime)
+            data = pd.concat(objs=[data, data0], axis=0, join="outer")
+        rename_dict = self.__rename_dict
+        data.rename(columns=rename_dict, inplace=True)
+        data.loc[:, "dateTime"] = data.loc[:, "dateTime"].apply(lambda x: datetime.datetime.strptime(x, "%Y%m%d"))
+        data.loc[:, "securityWeight"] = data.loc[:, "securityWeight"] / 100
+        data = data.loc[:, ["dateTime", "indexId", "securityId", "securityWeight"]].copy(deep=True)
+        return data
+
+    def __get_index_weights(self, securityId, date_datetime):
+        connect = self.connect()
+        date_datetime = date_datetime.strftime("%Y%m%d")
+        table_name_dict = self.__table_name_dict
+        table_name = table_name_dict.get(securityId, None)
+        if table_name is None:
+            raise BaseException("[%s] can not support index: %s now" % (self.LOGGER_NAME, securityId))
+        owner = self.get_oracle_owner(table_name=table_name)
+        sqlClause = ("select * from " + owner + table_name + " where trade_dt = '" + date_datetime + "'")
+        data = self.get_data_with_sql(sqlClause=sqlClause, connect=connect)
+        data.loc[:, "indexId"] = securityId
+        return data
+
+
+
+
+
+
+
+
+
 
 
 

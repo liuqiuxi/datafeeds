@@ -20,18 +20,16 @@ class AShareCalendarWindDataBase(BaseWindDataBase):
 
     def __init__(self):
         super(AShareCalendarWindDataBase, self).__init__()
+        self.__table_name_dict = {"AShareCalendarWindDataBase": "AShareCalendar"}
 
     def get_calendar(self, begin_datetime, end_datetime):
         connect = self.connect()
         begin_datetime = begin_datetime.strftime("%Y%m%d")
         end_datetime = end_datetime.strftime("%Y%m%d")
-        sqlClause = "SELECT owner FROM all_tables WHERE table_name = 'ASHARECALENDAR'"
-        owner = connect.execute(sqlClause).fetchone()
-        if owner is None:
-            raise BaseException("[%s] the ASHARECALENDAR table do not exist" % self.LOGGER_NAME)
-        else:
-            owner = owner.values()[0] + "."
-        sqlClause = ("select trade_days as dateTime from " + owner + "AShareCalendar where trade_days >= " +
+        table_name = self.__table_name_dict.get(self.LOGGER_NAME)
+        owner = self.get_oracle_owner(table_name=table_name)
+        table_parameter = owner + table_name
+        sqlClause = ("select trade_days as dateTime from " + table_parameter + " where trade_days >= " +
                      "'" + begin_datetime + "' and trade_days <= '" + end_datetime + "' ")
         data = self.get_data_with_sql(sqlClause=sqlClause, connect=connect)
         data.rename(columns={"datetime": "dateTime"}, inplace=True)
@@ -50,6 +48,7 @@ class AShareQuotationWindDataBase(BaseWindDataBase):
     def __init__(self):
         super(AShareQuotationWindDataBase, self).__init__()
         self.__need_adjust_columns = ["preClose", "open", "high", "low", "close", "volume", "avgPrice"]
+        self.__table_name_dict = {"AShareQuotationWindDataBase": "AShareEODPrices"}
 
     def get_quotation(self, securityIds, items, frequency, begin_datetime, end_datetime, adjusted="F"):
         limit_numbers = BarFeedConfig.get_wind().get("LimitNumbers")
@@ -71,32 +70,17 @@ class AShareQuotationWindDataBase(BaseWindDataBase):
         connect = self.connect()
         begin_datetime = begin_datetime.strftime("%Y%m%d")
         end_datetime = end_datetime.strftime("%Y%m%d")
-        sqlClause = "SELECT owner FROM all_tables WHERE table_name = 'ASHAREEODPRICES'"
-        owner = connect.execute(sqlClause).fetchone()
-        if owner is None:
-            raise BaseException("[%s] the ASHAREEODPRICES table do not exist" % self.LOGGER_NAME)
-        else:
-            owner = owner.values()[0] + "."
+        table_name = self.__table_name_dict.get(self.LOGGER_NAME)
+        owner = self.get_oracle_owner(table_name=table_name)
+        table_parameter = owner + table_name
         if frequency != 86400:
             raise BaseException("[%s] we can't supply frequency: %d " % (self.LOGGER_NAME, frequency))
         if len(securityIds) == 1:
-            sqlClause = ("select * from " + owner + "AShareEODPrices where trade_dt >= '" + begin_datetime + "' " +
+            sqlClause = ("select * from " + table_parameter + " where trade_dt >= '" + begin_datetime + "' " +
                          "and trade_dt <= '" + end_datetime + "' and s_info_windcode = '" + securityIds[0] + "'")
-            # sqlClause = ("select s_info_windcode as securityId, trade_dt as dateTime, s_dq_preclose as preClose, " +
-            #              "s_dq_open as open, s_dq_high as high, s_dq_low as low, s_dq_close as close, s_dq_change as " +
-            #              "cash_change, s_dq_pctchange as Chg, s_dq_volume as volume, s_dq_amount as amount, " +
-            #              "s_dq_adjfactor as adjfactor, S_dq_avgprice as avgPrice from " + owner + "AShareEODPrices " +
-            #              "where trade_dt >= '" + begin_datetime + "' and trade_dt <= '" + end_datetime + "' and " +
-            #              "s_info_windcode = '" + securityIds[0] + "'")
         else:
-            sqlClause = ("select * from " + owner + "AShareEODPrices where trade_dt >= '" + begin_datetime + "' and " +
+            sqlClause = ("select * from " + table_parameter + " where trade_dt >= '" + begin_datetime + "' and " +
                          "trade_dt <= '" + end_datetime + "' and s_info_windcode in " + str(tuple(securityIds)) + "")
-            # sqlClause = ("select s_info_windcode as securityId, trade_dt as dateTime, s_dq_preclose as preClose, " +
-            #              "s_dq_open as open, s_dq_high as high, s_dq_low as low, s_dq_close as close, s_dq_change as " +
-            #              "cash_change, s_dq_pctchange as Chg, s_dq_volume as volume, s_dq_amount as amount, " +
-            #              "s_dq_adjfactor as adjfactor, S_dq_avgprice as avgPrice from " + owner + "AShareEODPrices " +
-            #              "where trade_dt >= '" + begin_datetime + "' and trade_dt <= '" + end_datetime + "' and " +
-            #              "s_info_windcode in " + str(tuple(securityIds)) + "")
         data = self.get_data_with_sql(sqlClause=sqlClause, connect=connect)
         rename_dict = BarFeedConfig.get_wind_database_items().get(self.LOGGER_NAME)
         data.rename(columns=rename_dict, inplace=True)

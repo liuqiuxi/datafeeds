@@ -8,7 +8,6 @@
 # @Remark  : This is class of future market
 
 import datetime
-import copy
 import pandas as pd
 from datafeeds.winddatabasefeeds import BaseWindDataBase
 from datafeeds.utils import BarFeedConfig
@@ -20,6 +19,9 @@ class AFutureQuotationWindDataBase(BaseWindDataBase):
 
     def __init__(self):
         super(AFutureQuotationWindDataBase, self).__init__()
+        self.__table_name_dict = {"index_future": "CIndexFuturesEODPrices",
+                                  "commodity_future": "CCommodityFuturesEODPrices",
+                                  "bond_future": "CBondFuturesEODPrices"}
 
     def get_quotation(self, securityIds, items, frequency, begin_datetime, end_datetime, adjusted=None):
         if adjusted is not None:
@@ -45,64 +47,80 @@ class AFutureQuotationWindDataBase(BaseWindDataBase):
         begin_datetime = begin_datetime.strftime("%Y%m%d")
         end_datetime = end_datetime.strftime("%Y%m%d")
         # index future
-        sqlClause = "SELECT owner FROM all_tables WHERE table_name = 'CINDEXFUTURESEODPRICES'"
-        owner = connect.execute(sqlClause).fetchone()
-        if owner is None:
-            raise BaseException("[%s] the CINDEXFUTURESEODPRICES table do not exist" % self.LOGGER_NAME)
-        else:
-            owner = owner.values()[0] + "."
+        table_name = self.__table_name_dict.get("index_future")
+        owner = self.get_oracle_owner(table_name=table_name)
+        table_parameter = owner + table_name
         if len(securityIds) == 1:
-            sqlClause = ("select * from " + owner + "CIndexFuturesEODPrices where trade_dt >= " +
+            sqlClause = ("select * from " + table_parameter + " where trade_dt >= " +
                          "'" + begin_datetime + "' and trade_dt <= '" + end_datetime + "' and s_info_windcode = " +
                          "'" + securityIds[0] + "'")
-            # sqlClause = ("select s_info_windcode as securityId, trade_dt as dateTime, s_dq_presettle as preSettle, " +
-            #              "s_dq_open as open, s_dq_high as high, s_dq_low as low, s_dq_close as close, s_dq_settle as " +
-            #              "settle, s_dq_volume as volume, s_dq_amount as amount, s_dq_oi as openInterest, " +
-            #              "s_dq_change as cash_change from " + owner + "CIndexFuturesEODPrices where trade_dt >= " +
-            #              "'" + begin_datetime + "' and trade_dt <= '" + end_datetime + "' and s_info_windcode = " +
-            #              "'" + securityIds[0] + "'")
         else:
-            sqlClause = ("select * from " + owner + "CIndexFuturesEODPrices where trade_dt >= " +
+            sqlClause = ("select * from " + table_parameter + " where trade_dt >= " +
                          "'" + begin_datetime + "' and trade_dt <= '" + end_datetime + "' and s_info_windcode in " +
                          "" + str(tuple(securityIds)) + "")
-            # sqlClause = ("select s_info_windcode as securityId, trade_dt as dateTime, s_dq_presettle as preSettle, " +
-            #              "s_dq_open as open, s_dq_high as high, s_dq_low as low, s_dq_close as close, s_dq_settle as " +
-            #              "settle, s_dq_volume as volume, s_dq_amount as amount, s_dq_oi as openInterest, " +
-            #              "s_dq_change as cash_change from " + owner + "CIndexFuturesEODPrices where trade_dt >= " +
-            #              "'" + begin_datetime + "' and trade_dt <= '" + end_datetime + "' and s_info_windcode in " +
-            #              "" + str(tuple(securityIds)) + "")
         data = self.get_data_with_sql(sqlClause=sqlClause, connect=connect)
-        # index future did't have open interest change data, but commodity future may have
-        data.loc[:, "s_dq_oichange"] = None
         # commodity future
-        sqlClause = "SELECT owner FROM all_tables WHERE table_name = 'CCOMMODITYFUTURESEODPRICES'"
-        owner = connect.execute(sqlClause).fetchone()
-        if owner is None:
-            raise BaseException("[%s] the CCOMMODITYFUTURESEODPRICES table do not exist" % self.LOGGER_NAME)
-        else:
-            owner = owner.values()[0] + "."
+        table_name = self.__table_name_dict.get("commodity_future")
+        owner = self.get_oracle_owner(table_name=table_name)
+        table_parameter = owner + table_name
         if len(securityIds) == 1:
-            sqlClause = ("select * from " + owner + "CCommodityFuturesEODPrices where trade_dt >= " +
+            sqlClause = ("select * from " + table_parameter + " where trade_dt >= " +
                          "'" + begin_datetime + "' and trade_dt <= '" + end_datetime + "' and s_info_windcode = " +
                          "'" + securityIds[0] + "'")
-            # sqlClause = ("select s_info_windcode as securityId, trade_dt as dateTime, s_dq_presettle as preSettle, " +
-            #              "s_dq_open as open, s_dq_high as high, s_dq_low as low, s_dq_close as close, s_dq_settle as " +
-            #              "settle, s_dq_volume as volume, s_dq_amount as amount, s_dq_oi as openInterest, " +
-            #              "s_dq_change as cash_change, s_dq_oichange as openInterestChange from " + owner + "" +
-            #              "CCommodityFuturesEODPrices where trade_dt >= '" + begin_datetime + "' and trade_dt <= " +
-            #              "'" + end_datetime + "' and s_info_windcode = '" + securityIds[0] + "'")
         else:
-            sqlClause = ("select * from " + owner + "CCommodityFuturesEODPrices where trade_dt >= " +
+            sqlClause = ("select * from " + table_parameter + " where trade_dt >= " +
                          "'" + begin_datetime + "' and trade_dt <= '" + end_datetime + "' and s_info_windcode in " +
                          "" + str(tuple(securityIds)) + "")
-            # sqlClause = ("select s_info_windcode as securityId, trade_dt as dateTime, s_dq_presettle as preSettle, " +
-            #              "s_dq_open as open, s_dq_high as high, s_dq_low as low, s_dq_close as close, s_dq_settle as " +
-            #              "settle, s_dq_volume as volume, s_dq_amount as amount, s_dq_oi as openInterest, " +
-            #              "s_dq_change as cash_change, s_dq_oichange as openInterestChange from " + owner + "" +
-            #              "CCommodityFuturesEODPrices where trade_dt >= '" + begin_datetime + "' and trade_dt <= " +
-            #              "'" + end_datetime + "' and s_info_windcode in " + str(tuple(securityIds)) + "")
         data0 = self.get_data_with_sql(sqlClause=sqlClause, connect=connect)
-        data = pd.concat(objs=[data, data0], axis=0, join="outer")
+        # index future did't have open interest change data, but commodity future may have
+        if not data.empty and not data0.empty:
+            columns = list(set(data.columns).union(set(data0.columns)))
+            for column in columns:
+                if column not in data.columns:
+                    data.loc[:, column] = None
+                if column not in data0.columns:
+                    data0.loc[:, column] = None
+            data = data.loc[:, columns].copy(deep=True)
+            data0 = data0.loc[:, columns].copy(deep=True)
+            data = pd.concat(objs=[data, data0], axis=0, join="outer")
+        else:
+            if data.empty:
+                data = data0.copy(deep=True)
+            elif data0.empty:
+                data = data.copy(deep=True)
+            else:
+                raise BaseException("[AFutureQuotationWindDataBase] something may wrong")
+        # bond future
+        table_name = self.__table_name_dict.get("bond_future")
+        owner = self.get_oracle_owner(table_name=table_name)
+        table_parameter = owner + table_name
+        if len(securityIds) == 1:
+            sqlClause = ("select * from " + table_parameter + " where trade_dt >= " +
+                         "'" + begin_datetime + "' and trade_dt <= '" + end_datetime + "' and s_info_windcode = " +
+                         "'" + securityIds[0] + "'")
+        else:
+            sqlClause = ("select * from " + table_parameter + " where trade_dt >= " +
+                         "'" + begin_datetime + "' and trade_dt <= '" + end_datetime + "' and s_info_windcode in " +
+                         "" + str(tuple(securityIds)) + "")
+        data0 = self.get_data_with_sql(sqlClause=sqlClause, connect=connect)
+        # bond future did't have open interest change data, but commodity future may have
+        if not data.empty and not data0.empty:
+            columns = list(set(data.columns).union(set(data0.columns)))
+            for column in columns:
+                if column not in data.columns:
+                    data.loc[:, column] = None
+                if column not in data0.columns:
+                    data0.loc[:, column] = None
+            data = data.loc[:, columns].copy(deep=True)
+            data0 = data0.loc[:, columns].copy(deep=True)
+            data = pd.concat(objs=[data, data0], axis=0, join="outer")
+        else:
+            if data.empty:
+                data = data0.copy(deep=True)
+            elif data0.empty:
+                data = data.copy(deep=True)
+            else:
+                raise BaseException("[AFutureQuotationWindDataBase] something may wrong")
         rename_dict = BarFeedConfig.get_wind_database_items().get(self.LOGGER_NAME)
         data.rename(columns=rename_dict, inplace=True)
         # change some parameters value to normal value

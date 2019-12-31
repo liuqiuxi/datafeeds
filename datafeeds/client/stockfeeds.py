@@ -13,7 +13,7 @@ from datafeeds import logger
 from datafeeds.winddatabasefeeds.stockfeedswinddatabase import AShareCalendarWindDataBase
 from datafeeds.tusharefeeds.stockfeedstushare import AShareCalendarTuShare
 from datafeeds.jqdatafeeds.stockfeedsjqdata import AShareCalendarJqData
-from datafeeds.windclientfeeds.stockfeedswindclient import AShareCalendarWindClient
+# from datafeeds.windclientfeeds.stockfeedswindclient import AShareCalendarWindClient
 from datafeeds.winddatabasefeeds.stockfeedswinddatabase import AShareQuotationWindDataBase
 
 
@@ -37,8 +37,8 @@ class AShareCalendar:
             data = AShareCalendarTuShare().get_calendar(begin_datetime=begin_datetime, end_datetime=end_datetime)
         elif dataSource == "jqdata":
             data = AShareCalendarJqData().get_calendar(begin_datetime=begin_datetime, end_datetime=end_datetime)
-        elif dataSource == "windclient":
-            data = AShareCalendarWindClient().get_calendar(begin_datetime=begin_datetime, end_datetime=end_datetime)
+        # elif dataSource == "windclient":
+        #     data = AShareCalendarWindClient().get_calendar(begin_datetime=begin_datetime, end_datetime=end_datetime)
         else:
             raise BaseException("[%s] dataSource: %s can't supply now" % dataSource)
         data.loc[:, "dateSource"] = dataSource
@@ -82,11 +82,13 @@ class AShareQuotation:
                                                                end_datetime=end_datetime, adjusted=adjusted)
         else:
             raise BaseException("[%s] dataSource: %s can't supply now" % dataSource)
-        data.loc[:, "dateSource"] = dataSource
-        data.sort_values(by=["securityId", "dateTime"], axis=0, ascending=True, inplace=True)
-        data.reset_index(drop=True, inplace=True)
+        if not data.empty:
+            data.sort_values(by=["securityId", "dateTime"], axis=0, ascending=True, inplace=True)
+            data.reset_index(drop=True, inplace=True)
+            data.loc[:, "dateSource"] = dataSource
+        else:
+            log.warning("%s did't get data, please check it " % securityIds)
         return data
-
 
 
 

@@ -45,6 +45,17 @@ class BaseWindDataBase(metaclass=abc.ABCMeta):
         connect = sqlalchemy.create_engine(connectClause).connect()
         return connect
 
+    def get_oracle_owner(self, table_name):
+        connect = self.connect()
+        sqlClause = "SELECT owner FROM all_tables WHERE table_name = '%s'" % table_name.upper()
+        owner = connect.execute(sqlClause).fetchone()
+        if owner is None:
+            raise BaseException("[%s] the %s table do not exist" % (self.LOGGER_NAME, table_name))
+        else:
+            owner = owner.values()[0] + "."
+        connect.close()
+        return owner
+
     @staticmethod
     def get_data_with_sql(sqlClause, connect):
         data = pd.read_sql(sql=sqlClause, con=connect)
@@ -56,7 +67,6 @@ class BaseWindDataBase(metaclass=abc.ABCMeta):
         for securityId in securityIds:
             if not isinstance(securityId, str):
                 raise BaseException("[BaseJqData] the securityId in securityIds must be str")
-        log = logger.get_logger(name=self.LOGGER_NAME)
         connect = self.connect()
         # stock
         sqlClause = "SELECT owner FROM all_tables WHERE table_name = 'ASHAREDESCRIPTION'"
