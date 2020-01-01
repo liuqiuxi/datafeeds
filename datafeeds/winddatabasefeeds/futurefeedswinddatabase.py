@@ -26,7 +26,7 @@ class AFutureQuotationWindDataBase(BaseWindDataBase):
     def get_quotation(self, securityIds, items, frequency, begin_datetime, end_datetime, adjusted=None):
         if adjusted is not None:
             log = logger.get_logger(name=self.LOGGER_NAME)
-            log.info("Future data has no adjust price, so we change adjusted to None")
+            log.info("Future data has no adjust price, so we change adjusted %s to None" % adjusted)
         limit_numbers = BarFeedConfig.get_wind().get("LimitNumbers")
         if len(securityIds) < limit_numbers:
             data = self.__get_quotation(securityIds=securityIds, items=items, frequency=frequency,
@@ -128,8 +128,7 @@ class AFutureQuotationWindDataBase(BaseWindDataBase):
         data.loc[:, "amount"] = data.loc[:, "amount"] * 10000
         # choose items to data
         log = logger.get_logger(name=self.LOGGER_NAME)
-        default_items = BarFeedConfig.get_wind_database_items().get(self.LOGGER_NAME)
-        default_items = list(default_items.values())
+        default_items = list(rename_dict.values())
         real_items = []
         for item in items:
             if item in ["securityId", "dateTime"]:

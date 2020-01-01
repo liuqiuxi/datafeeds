@@ -12,6 +12,7 @@ import datetime
 from datafeeds.utils import BarFeedConfig
 from datafeeds import logger
 from datafeeds.winddatabasefeeds.indexfeedswinddatabase import AIndexQuotationWindDataBase
+from datafeeds.jqdatafeeds.indexfeedsjqdata import AIndexQuotationJqData
 
 
 class AIndexQuotation:
@@ -46,6 +47,12 @@ class AIndexQuotation:
             data = AIndexQuotationWindDataBase().get_quotation(securityIds=securityIds, items=items,
                                                                frequency=frequency, begin_datetime=begin_datetime,
                                                                end_datetime=end_datetime, adjusted=adjusted)
+        elif dataSource == "jqdata":
+            if frequency % 60 != 0:
+                raise BaseException("[AIndexQuotation] jqdata can not supply frequency: %d now" % frequency)
+            data = AIndexQuotationJqData().get_quotation(securityIds=securityIds, items=items,
+                                                         frequency=frequency, begin_datetime=begin_datetime,
+                                                         end_datetime=end_datetime, adjusted=adjusted)
         else:
             raise BaseException("[%s] dataSource: %s can't supply now" % dataSource)
         if not data.empty:

@@ -1,46 +1,42 @@
 # -*- coding:utf-8 -*-
-# @Time    : 2019-12-27 15:48
+# @Time    : 2020/1/122:48
 # @Author  : liuqiuxi
 # @Email   : liuqiuxi1990@gmail.com
-# @File    : stockfeedsjqdata.py
+# @File    : fundfeedsjqdata.py
 # @Project : datafeeds
 # @Software: PyCharm
-# @Remark  : This is class of stock market
+# @Remark  : This is class of option market
 
-import datetime
 import pandas as pd
 from datafeeds.jqdatafeeds import BaseJqData
 from datafeeds.utils import BarFeedConfig
 from datafeeds import logger
 
 
-class AShareCalendarJqData(BaseJqData):
+class AFundQuotationJqData(BaseJqData):
+    LOGGER_NAME = "AFundQuotationJqData"
 
     def __init__(self):
-        super(AShareCalendarJqData, self).__init__()
-
-    def get_calendar(self, begin_datetime, end_datetime):
-        connect = self.connect()
-        data = connect.get_trade_days(start_date=begin_datetime, end_date=end_datetime, count=None)
-        data = pd.DataFrame(data={"dateTime": data})
-        datetime_list = data.loc[:, "dateTime"].apply(
-            lambda x: datetime.datetime.combine(date=x, time=datetime.time.min))
-        data.loc[:, "dateTime"] = datetime_list
-        data.drop_duplicates(subset=["dateTime"], keep="first", inplace=True)
-        data.sort_values(by="dateTime", axis=0, ascending=True, inplace=True)
-        data.reset_index(drop=True, inplace=True)
-        connect.logout()
-        return data
-
-
-class AShareQuotationJqData(BaseJqData):
-    LOGGER_NAME = "AShareQuotationJqData"
-
-    def __init__(self):
-        super(AShareQuotationJqData, self).__init__()
+        super(AFundQuotationJqData, self).__init__()
         self.__adjust_name_dict = {"F": "pre", "B": "post"}
 
     def get_quotation(self, securityIds, items, frequency, begin_datetime, end_datetime, adjusted=None):
+        log = logger.get_logger(name=self.LOGGER_NAME)
+        securityIds_OTC = []
+        securityIds_EXC = []
+        # 判断场内场外基金
+        for securityId in securityIds:
+            code_suffix = securityId[securityId.find(".") + 1:]
+            if code_suffix == "OF":
+                securityIds_OTC.append(securityId)
+            elif code_suffix == "SH" or code_suffix == "SZ":
+                securityIds_EXC.append(securityId)
+            else:
+                log.warning("the securityId: %s did't support in fund quotation, we remove it" % securityId)
+        # 得到场内基金数据
+        pass
+
+    def get_exchange_quotation(self, securityIds, items, frequency, begin_datetime, end_datetime, adjusted):
         connect = self.connect()
         securityIds = self.wind_to_default(securityIds=securityIds)
         frequency = self.get_frequency_cycle(frequency=frequency)
@@ -53,7 +49,6 @@ class AShareQuotationJqData(BaseJqData):
             data0.loc[:, "dateTime"] = data0.index
             securityId = self.default_to_wind(securityIds=[securityId])
             data0.loc[:, "securityId"] = securityId
-
             data = pd.concat(objs=[data, data0], axis=0, join="outer")
         data.rename(columns=rename_dict, inplace=True)
         # choose items to data
@@ -70,6 +65,20 @@ class AShareQuotationJqData(BaseJqData):
         data = data.loc[:, ["dateTime", "securityId"] + real_items].copy(deep=True)
         connect.logout()
         return data
+
+    def get_otc_quotation(self, securityIds, items, frequency, begin_datetime, end_datetime, adjusted):
+        connect = self.connect()
+        # jqdata OTC code did't need suffix
+        for i in range(len(securityIds)):
+            securityId = securityIds[i]
+            securityId = securityId.replace(".OF", "")
+            securityIds[i] = securityId
+            pass
+
+
+
+
+
 
 
 

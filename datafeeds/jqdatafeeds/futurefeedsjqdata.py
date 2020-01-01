@@ -1,50 +1,32 @@
 # -*- coding:utf-8 -*-
-# @Time    : 2019-12-27 15:48
+# @Time    : 2020/1/117:19
 # @Author  : liuqiuxi
 # @Email   : liuqiuxi1990@gmail.com
-# @File    : stockfeedsjqdata.py
+# @File    : futurefeedsjqdata.py
 # @Project : datafeeds
 # @Software: PyCharm
-# @Remark  : This is class of stock market
+# @Remark  : This is class of future market
 
-import datetime
 import pandas as pd
 from datafeeds.jqdatafeeds import BaseJqData
 from datafeeds.utils import BarFeedConfig
 from datafeeds import logger
 
 
-class AShareCalendarJqData(BaseJqData):
+class AFutureQuotationJqData(BaseJqData):
+    LOGGER_NAME = "AFutureQuotationJqData"
 
     def __init__(self):
-        super(AShareCalendarJqData, self).__init__()
-
-    def get_calendar(self, begin_datetime, end_datetime):
-        connect = self.connect()
-        data = connect.get_trade_days(start_date=begin_datetime, end_date=end_datetime, count=None)
-        data = pd.DataFrame(data={"dateTime": data})
-        datetime_list = data.loc[:, "dateTime"].apply(
-            lambda x: datetime.datetime.combine(date=x, time=datetime.time.min))
-        data.loc[:, "dateTime"] = datetime_list
-        data.drop_duplicates(subset=["dateTime"], keep="first", inplace=True)
-        data.sort_values(by="dateTime", axis=0, ascending=True, inplace=True)
-        data.reset_index(drop=True, inplace=True)
-        connect.logout()
-        return data
-
-
-class AShareQuotationJqData(BaseJqData):
-    LOGGER_NAME = "AShareQuotationJqData"
-
-    def __init__(self):
-        super(AShareQuotationJqData, self).__init__()
-        self.__adjust_name_dict = {"F": "pre", "B": "post"}
+        super(AFutureQuotationJqData, self).__init__()
 
     def get_quotation(self, securityIds, items, frequency, begin_datetime, end_datetime, adjusted=None):
+        log = logger.get_logger(name=self.LOGGER_NAME)
+        if adjusted is not None:
+            log.info("Future data has no adjust price, so we change adjusted %s to None" % adjusted)
+            adjusted = None
         connect = self.connect()
         securityIds = self.wind_to_default(securityIds=securityIds)
         frequency = self.get_frequency_cycle(frequency=frequency)
-        adjusted = self.__adjust_name_dict.get(adjusted, None)
         rename_dict = BarFeedConfig.get_jq_data_items().get(self.LOGGER_NAME)
         data = pd.DataFrame()
         for securityId in securityIds:
@@ -53,11 +35,9 @@ class AShareQuotationJqData(BaseJqData):
             data0.loc[:, "dateTime"] = data0.index
             securityId = self.default_to_wind(securityIds=[securityId])
             data0.loc[:, "securityId"] = securityId
-
             data = pd.concat(objs=[data, data0], axis=0, join="outer")
         data.rename(columns=rename_dict, inplace=True)
         # choose items to data
-        log = logger.get_logger(name=self.LOGGER_NAME)
         default_items = list(rename_dict.values())
         real_items = []
         for item in items:
@@ -70,13 +50,4 @@ class AShareQuotationJqData(BaseJqData):
         data = data.loc[:, ["dateTime", "securityId"] + real_items].copy(deep=True)
         connect.logout()
         return data
-
-
-
-
-
-
-
-
-
 

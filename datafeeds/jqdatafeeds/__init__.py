@@ -125,6 +125,22 @@ class BaseJqData(metaclass=abc.ABCMeta):
             data.reset_index(drop=True, inplace=True)
         return data
 
+    @staticmethod
+    def get_frequency_cycle(frequency):
+        if not isinstance(frequency, (int, float)):
+            raise BaseException("[BaseJqData] frequency type only can be int or float")
+        if frequency <= 0:
+            raise BaseException("[BaseJqData] frequency must great than 0")
+        if int(frequency / 86400) == 0:
+            cycle = str(int(frequency / 60)) + "m"
+        else:
+            cycle = str(int(frequency / 86400)) + "d"
+        return cycle
+
+
+
+
+
 
 
 

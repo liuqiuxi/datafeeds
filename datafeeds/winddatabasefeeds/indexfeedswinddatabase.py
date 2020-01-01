@@ -64,8 +64,7 @@ class AIndexQuotationWindDataBase(BaseWindDataBase):
         data.loc[:, "amount"] = data.loc[:, "amount"] * 1000
         # choose items to data
         log = logger.get_logger(name=self.LOGGER_NAME)
-        default_items = BarFeedConfig.get_wind_database_items().get(self.LOGGER_NAME)
-        default_items = list(default_items.values())
+        default_items = list(rename_dict.values())
         real_items = []
         for item in items:
             if item in ["securityId", "dateTime"]:

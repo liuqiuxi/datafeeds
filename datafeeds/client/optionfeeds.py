@@ -11,6 +11,7 @@ import datetime
 from datafeeds import logger
 from datafeeds.utils import BarFeedConfig
 from datafeeds.winddatabasefeeds.optionfeedswinddatabase import AOptionQuotationWindDataBase
+from datafeeds.jqdatafeeds.optionfeedsjqdata import AOptionQuotationJqData
 
 
 class AOptionQuotation:
@@ -41,10 +42,16 @@ class AOptionQuotation:
             log.info("dataSource did't allocated, so we use init config: %s" % dataSource)
         if dataSource == "wind":
             if frequency != 86400:
-                raise BaseException("[AIndexQuotation] wind can not supply frequency: %d now" % frequency)
+                raise BaseException("[AOptionQuotation] wind can not supply frequency: %d now" % frequency)
             data = AOptionQuotationWindDataBase().get_quotation(securityIds=securityIds, items=items,
                                                                 frequency=frequency, begin_datetime=begin_datetime,
                                                                 end_datetime=end_datetime, adjusted=adjusted)
+        elif dataSource == "jqdata":
+            if frequency % 60 != 0:
+                raise BaseException("[AOptionQuotation] jqdata can not supply frequency: %d now" % frequency)
+            data = AOptionQuotationJqData().get_quotation(securityIds=securityIds, items=items,
+                                                          frequency=frequency, begin_datetime=begin_datetime,
+                                                          end_datetime=end_datetime, adjusted=adjusted)
         else:
             raise BaseException("[%s] dataSource: %s can't supply now" % dataSource)
         if not data.empty:

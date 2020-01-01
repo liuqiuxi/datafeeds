@@ -11,6 +11,7 @@ import datetime
 from datafeeds import logger
 from datafeeds.utils import BarFeedConfig
 from datafeeds.winddatabasefeeds.futurefeedswinddatabase import AFutureQuotationWindDataBase
+from datafeeds.jqdatafeeds.futurefeedsjqdata import AFutureQuotationJqData
 
 
 class AFutureQuotation:
@@ -45,6 +46,12 @@ class AFutureQuotation:
             data = AFutureQuotationWindDataBase().get_quotation(securityIds=securityIds, items=items,
                                                                 frequency=frequency, begin_datetime=begin_datetime,
                                                                 end_datetime=end_datetime, adjusted=adjusted)
+        elif dataSource == "jqdata":
+            if frequency % 60 != 0:
+                raise BaseException("[AFutureQuotation] jqdata can not supply frequency: %d now" % frequency)
+            data = AFutureQuotationJqData().get_quotation(securityIds=securityIds, items=items,
+                                                          frequency=frequency, begin_datetime=begin_datetime,
+                                                          end_datetime=end_datetime, adjusted=adjusted)
         else:
             raise BaseException("[%s] dataSource: %s can't supply now" % dataSource)
         if not data.empty:

@@ -54,11 +54,11 @@ class BarFeedConfig:
     @staticmethod
     def get_client_config():
         config = {"AShareCalendar": "jqdata",
-                  "AShareQuotation": "wind",
-                  "AIndexQuotation": "wind",
-                  "AFutureQuotation": "wind",
-                  "AOptionQuotation": "wind",
-                  "AFundQuotation": "wind"
+                  "AShareQuotation": "jqdata",
+                  "AIndexQuotation": "jqdata",
+                  "AFutureQuotation": "jqdata",
+                  "AOptionQuotation": "jqdata",
+                  "AFundQuotation": "jqdata"
                   }
         return config
 
@@ -103,6 +103,22 @@ class BarFeedConfig:
                                                  "s_dq_adjfactor": "adjfactor", "f_info_windcode": "securityId",
                                                  "price_date": "dateTime", "f_nav_unit": "close",
                                                  "f_nav_adjfactor": "adjfactor"}
+                  }
+        return config
+
+    @staticmethod
+    def get_jq_data_items():
+        config = {"AShareQuotationJqData": {"open": "open", "high": "high", "low": "low", "close": "close",
+                                            "volume": "volume", "money": "amount"},
+                  "AFutureQuotationJqData": {"open": "open", "high": "high", "low": "low", "close": "close",
+                                             "volume": "volume", "money": "amount"},
+                  "AIndexQuotationJqData": {"open": "open", "high": "high", "low": "low", "close": "close",
+                                            "volume": "volume", "money": "amount"},
+                  "AOptionQuotationJqData": {"open": "open", "high": "high", "low": "low", "close": "close",
+                                             "volume": "volume", "money": "amount"},
+                  "AFundQuotationJqData": {"open": "open", "high": "high", "low": "low", "close": "close",
+                                           "volume": "volume", "money": "amount"}
+
                   }
         return config
 

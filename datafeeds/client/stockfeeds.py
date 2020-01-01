@@ -13,8 +13,9 @@ from datafeeds import logger
 from datafeeds.winddatabasefeeds.stockfeedswinddatabase import AShareCalendarWindDataBase
 from datafeeds.tusharefeeds.stockfeedstushare import AShareCalendarTuShare
 from datafeeds.jqdatafeeds.stockfeedsjqdata import AShareCalendarJqData
-# from datafeeds.windclientfeeds.stockfeedswindclient import AShareCalendarWindClient
+from datafeeds.windclientfeeds.stockfeedswindclient import AShareCalendarWindClient
 from datafeeds.winddatabasefeeds.stockfeedswinddatabase import AShareQuotationWindDataBase
+from datafeeds.jqdatafeeds.stockfeedsjqdata import AShareQuotationJqData
 
 
 class AShareCalendar:
@@ -37,8 +38,8 @@ class AShareCalendar:
             data = AShareCalendarTuShare().get_calendar(begin_datetime=begin_datetime, end_datetime=end_datetime)
         elif dataSource == "jqdata":
             data = AShareCalendarJqData().get_calendar(begin_datetime=begin_datetime, end_datetime=end_datetime)
-        # elif dataSource == "windclient":
-        #     data = AShareCalendarWindClient().get_calendar(begin_datetime=begin_datetime, end_datetime=end_datetime)
+        elif dataSource == "windclient":
+            data = AShareCalendarWindClient().get_calendar(begin_datetime=begin_datetime, end_datetime=end_datetime)
         else:
             raise BaseException("[%s] dataSource: %s can't supply now" % dataSource)
         data.loc[:, "dateSource"] = dataSource
@@ -80,6 +81,12 @@ class AShareQuotation:
             data = AShareQuotationWindDataBase().get_quotation(securityIds=securityIds, items=items,
                                                                frequency=frequency, begin_datetime=begin_datetime,
                                                                end_datetime=end_datetime, adjusted=adjusted)
+        elif dataSource == "jqdata":
+            if frequency % 60 != 0:
+                raise BaseException("[AFutureQuotation] jqdata can not supply frequency: %d now" % frequency)
+            data = AShareQuotationJqData().get_quotation(securityIds=securityIds, items=items,
+                                                         frequency=frequency, begin_datetime=begin_datetime,
+                                                         end_datetime=end_datetime, adjusted=adjusted)
         else:
             raise BaseException("[%s] dataSource: %s can't supply now" % dataSource)
         if not data.empty:
