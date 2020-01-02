@@ -96,7 +96,8 @@ class AShareQuotationWindDataBase(BaseWindDataBase):
         data.reset_index(inplace=True, drop=True)
         # choose items to data
         log = logger.get_logger(name=self.LOGGER_NAME)
-        default_items = list(rename_dict.values())
+        default_items = BarFeedConfig.get_wind_database_items().get(self.LOGGER_NAME)
+        default_items = list(default_items.values())
         real_items = []
         for item in items:
             if item in ["securityId", "dateTime"]:
@@ -124,6 +125,45 @@ class AShareQuotationWindDataBase(BaseWindDataBase):
         for column in columns:
             data.loc[:, column] = data.loc[:, column] * data.loc[:, "adjfactor"]
         return data
+
+
+class AShareIPOWindDataBase(BaseWindDataBase):
+    LOGGER_NAME = "AShareIPOWindDataBase"
+
+    def __init__(self):
+        super(AShareIPOWindDataBase, self).__init__()
+        self.__table_name_dict = {"AShareIPOWindDataBase": "AShareIPO"}
+
+    def get_initial_public_offering(self, securityIds):
+        connect = self.connect()
+        table_name = self.__table_name_dict.get(self.LOGGER_NAME)
+        owner = self.get_oracle_owner(table_name=table_name)
+        table_parameter = owner + table_name
+        sqlClause = "select * from " + table_parameter + ""
+        data = self.get_data_with_sql(sqlClause=sqlClause, connect=connect)
+        default_items = list(BarFeedConfig.get_wind_database_items().get(self.LOGGER_NAME))
+        drop_items = list(set(data.columns) - set(default_items))
+        data.drop(labels=drop_items, axis=1, inplace=True)
+        rename_dict = BarFeedConfig.get_wind_database_items().get(self.LOGGER_NAME)
+        data.rename(columns=rename_dict, inplace=True)
+        data0 = pd.DataFrame({"securityId": securityIds})
+        data = pd.merge(left=data, right=data0, on="securityId", how="right")
+        # change parameters numbers
+        data.loc[:, "amount"] = data.loc[:, "amount"] * 10000
+        data.loc[:, "collection"] = data.loc[:, "collection"] * 10000
+        data.loc[:, "subDate"] = data.loc[:, "subDate"].apply(
+            lambda x: None if x is None else datetime.datetime.strptime(x, "%Y%m%d"))
+        data.loc[:, "listDate"] = data.loc[:, "listDate"].apply(
+            lambda x: None if x is None else datetime.datetime.strptime(x, "%Y%m%d"))
+        data.sort_values(by="securityId", axis=0, ascending=True, inplace=True)
+        data.reset_index(inplace=True, drop=True)
+        return data
+
+
+
+
+
+
 
 
 
