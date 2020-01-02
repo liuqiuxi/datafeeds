@@ -14,7 +14,7 @@ class BarFeedConfig:
 
     @staticmethod
     def get_tushare():
-        config = {"token": "",
+        config = {"token": "592204bae01431106102416727abc9b4a40e56841722d3ab66c2a466",
                   "futureExchange": ["CFFEX", "DCE", "CZCE", "SHFE", "INE"],
                   "indexExchange": ["MSCI", "CSI", "SSE", "SZSE", "CICC", "SW", "OTH"],
                   "fundExchange": ["E", "O"],
@@ -26,19 +26,19 @@ class BarFeedConfig:
 
     @staticmethod
     def get_wind():
-        config = {"Server": "",
-                  "Port": "",
-                  "DateBase": "",
-                  "UserId": "",
-                  "PassWord": "",
+        config = {"Server": "26.4.0.60",
+                  "Port": "1522",
+                  "DateBase": "wideaprd",
+                  "UserId": "ideawindprd_ro",
+                  "PassWord": "paic12345",
                   "LimitNumbers": 1000
                   }
         return config
 
     @staticmethod
     def get_jqdata():
-        config = {"username": "",
-                  "password": ""
+        config = {"username": "18244236905",
+                  "password": "123456abc"
                   }
         return config
 
@@ -54,11 +54,13 @@ class BarFeedConfig:
     @staticmethod
     def get_client_config():
         config = {"AShareCalendar": "jqdata",
-                  "AShareQuotation": "jqdata",
-                  "AIndexQuotation": "jqdata",
-                  "AFutureQuotation": "jqdata",
-                  "AOptionQuotation": "jqdata",
-                  "AFundQuotation": "jqdata"
+                  "AShareQuotation": "wind",
+                  "AIndexQuotation": "wind",
+                  "AFutureQuotation": "wind",
+                  "AOptionQuotation": "wind",
+                  "AFundQuotation": "wind",
+                  "AIndexWeights": "wind",
+                  "AShareIndustry": "windclient"
                   }
         return config
 
@@ -102,7 +104,12 @@ class BarFeedConfig:
                                                  "s_dq_volume": "volume", "s_dq_amount": "amount",
                                                  "s_dq_adjfactor": "adjfactor", "f_info_windcode": "securityId",
                                                  "price_date": "dateTime", "f_nav_unit": "close",
-                                                 "f_nav_adjfactor": "adjfactor"}
+                                                 "f_nav_adjfactor": "adjfactor"},
+
+                  "AShareIPOWindDataBase": {"s_info_windcode": "securityId", "s_ipo_price": "ipoPrice",
+                                            "s_ipo_ pre_ dilutedpe": "predilutedPE", "s_ipo_dilutedpe": "dilutedPE",
+                                            "s_ipo_amount": "amount", "s_ipo_collection": "collection",
+                                            "s_ipo_subdate": "subDate", "s_ipo_listdate": "listDate"}
                   }
         return config
 
