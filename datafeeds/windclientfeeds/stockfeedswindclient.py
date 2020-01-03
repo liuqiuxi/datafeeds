@@ -25,4 +25,60 @@ class AShareCalendarWindClient(BaseWindClient):
         data = pd.DataFrame(data={"dateTime": data.Data[0]})
         data.sort_values(by="dateTime", axis=0, ascending=True, inplace=True)
         data.reset_index(drop=True, inplace=True)
+        connect.stop()
         return data
+
+
+class AShareIndustryWindClient(BaseWindClient):
+    LOGGER_NAME = "AShareIndustryWindClient"
+
+    def __init__(self):
+        super(AShareIndustryWindClient, self).__init__()
+
+    def get_sw_industry(self, securityIds, date_datetime, lv):
+        connect = self.connect()
+        date_datetime = date_datetime.strftime("%Y%m%d")
+        lv = str(lv)
+        instruments = ""
+        for securityId in securityIds:
+            instruments = securityId + "," + instruments
+        instruments = instruments[:-1]
+        data = connect.wss(codes=instruments, fields="industry2",
+                           options="industryType=1;industryStandard=" + lv + ";tradeDate=" + date_datetime + "")
+        data = pd.DataFrame(data={"securityId": data.Codes, "industryName": data.Data[0]})
+        data.loc[:, "dateTime"] = datetime.datetime.strptime(date_datetime, "%Y%m%d")
+        connect.stop()
+        return data
+
+    def get_zx_industry(self, securityIds, date_datetime, lv):
+        connect = self.connect()
+        date_datetime = date_datetime.strftime("%Y%m%d")
+        lv = str(lv)
+        instruments = ""
+        for securityId in securityIds:
+            instruments = securityId + "," + instruments
+        instruments = instruments[:-1]
+        data = connect.wss(codes=instruments, fields="industry2",
+                           options="industryType=3;industryStandard=" + lv + ";tradeDate=" + date_datetime + "")
+        data = pd.DataFrame(data={"securityId": data.Codes, "industryName": data.Data[0]})
+        data.loc[:, "dateTime"] = datetime.datetime.strptime(date_datetime, "%Y%m%d")
+        connect.stop()
+        return data
+
+    def get_wind_industry(self, securityIds, date_datetime, lv):
+        connect = self.connect()
+        date_datetime = date_datetime.strftime("%Y%m%d")
+        lv = str(lv)
+        instruments = ""
+        for securityId in securityIds:
+            instruments = securityId + "," + instruments
+        instruments = instruments[:-1]
+        data = connect.wss(codes=instruments, fields="industry2",
+                           options="industryType=2;industryStandard=" + lv + ";tradeDate=" + date_datetime + "")
+        data = pd.DataFrame(data={"securityId": data.Codes, "industryName": data.Data[0]})
+        data.loc[:, "dateTime"] = datetime.datetime.strptime(date_datetime, "%Y%m%d")
+        connect.stop()
+        return data
+
+
+
