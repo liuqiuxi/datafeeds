@@ -12,6 +12,7 @@ import datetime
 from datafeeds.utils import BarFeedConfig
 from datafeeds import logger
 from datafeeds.winddatabasefeeds.indexfeedswinddatabase import AIndexQuotationWindDataBase
+from datafeeds.winddatabasefeeds.indexfeedswinddatabase import AIndexWeightsWindDataBase
 from datafeeds.jqdatafeeds.indexfeedsjqdata import AIndexQuotationJqData
 
 
@@ -54,7 +55,7 @@ class AIndexQuotation:
                                                          frequency=frequency, begin_datetime=begin_datetime,
                                                          end_datetime=end_datetime, adjusted=adjusted)
         else:
-            raise BaseException("[%s] dataSource: %s can't supply now" % dataSource)
+            raise BaseException("[AIndexQuotation] dataSource: %s can't supply now" % dataSource)
         if not data.empty:
             data.sort_values(by=["securityId", "dateTime"], axis=0, ascending=True, inplace=True)
             data.reset_index(drop=True, inplace=True)
@@ -62,3 +63,39 @@ class AIndexQuotation:
         else:
             log.warning("%s did't get data, please check it " % securityIds)
         return data
+
+
+class AIndexWeights:
+
+    @staticmethod
+    def get_index_weights(securityIds, date_datetime, dataSource=None):
+        log = logger.get_logger(name="AIndexWeights")
+        if not isinstance(securityIds, list):
+            raise BaseException("[AIndexWeights] securityIds must be list")
+        for securityId in securityIds:
+            if not isinstance(securityId, str):
+                raise BaseException("[AIndexWeights] securityId in securityIds must be str")
+        if not isinstance(date_datetime, datetime.datetime):
+            raise BaseException("[AIndexWeights] date_datetime must be datetime.datetime")
+        if dataSource is None:
+            dataSource = BarFeedConfig.get_client_config().get("AIndexWeights")
+            log.info("dataSource did't allocated, so we use init config: %s" % dataSource)
+        if dataSource == "wind":
+            data = AIndexWeightsWindDataBase().get_index_weights(securityIds=securityIds, date_datetime=date_datetime)
+        else:
+            raise BaseException("[AIndexWeights] dataSource: %s can't supply now" % dataSource)
+        if not data.empty:
+            data.sort_values(by=["indexId", "securityId"], axis=0, ascending=True, inplace=True)
+            data.reset_index(drop=True, inplace=True)
+            data.loc[:, "dateSource"] = dataSource
+        else:
+            log.warning("%s did't get data, please check it " % securityIds)
+        return data
+
+
+
+
+
+
+
+

@@ -16,6 +16,7 @@ from datafeeds.jqdatafeeds.stockfeedsjqdata import AShareCalendarJqData
 from datafeeds.windclientfeeds.stockfeedswindclient import AShareCalendarWindClient
 from datafeeds.winddatabasefeeds.stockfeedswinddatabase import AShareQuotationWindDataBase
 from datafeeds.jqdatafeeds.stockfeedsjqdata import AShareQuotationJqData
+from datafeeds.windclientfeeds.stockfeedswindclient import AShareIndustryWindClient
 
 
 class AShareCalendar:
@@ -53,6 +54,7 @@ class AShareQuotation:
 
     @staticmethod
     def get_quotation(securityIds, items, frequency, begin_datetime, end_datetime, adjusted="B", dataSource=None):
+        log = logger.get_logger(name="AShareQuotation")
         if not isinstance(securityIds, list):
             raise BaseException("[AShareQuotation] securityIds must be list")
         for securityId in securityIds:
@@ -72,7 +74,6 @@ class AShareQuotation:
         if adjusted not in ["F", "B", None]:
             raise BaseException("[AShareQuotation] adjusted only can in [F, B, None], not supply %s" % adjusted)
         if dataSource is None:
-            log = logger.get_logger(name="AShareQuotation")
             dataSource = BarFeedConfig.get_client_config().get("AShareQuotation")
             log.info("dataSource did't allocated, so we use init config: %s" % dataSource)
         if dataSource == "wind":
@@ -96,6 +97,111 @@ class AShareQuotation:
         else:
             log.warning("%s did't get data, please check it " % securityIds)
         return data
+
+
+class AShareIndustry:
+
+    @staticmethod
+    def get_sw_industry(securityIds, date_datetime, lv=1, dataSource=None):
+        log = logger.get_logger(name="AShareIndustry")
+        if not isinstance(securityIds, list):
+            raise BaseException("[AShareIndustry] securityIds must be list")
+        for securityId in securityIds:
+            if not isinstance(securityId, str):
+                raise BaseException("[AShareQuotation] securityId in securityIds must be str")
+        if not isinstance(date_datetime, datetime.datetime):
+            raise BaseException("[AShareIndustry] date_datetime must be datetime.datetime")
+        if not isinstance(lv, int):
+            raise BaseException("[AShareIndustry] lv type must be int")
+        if lv not in [1, 2, 3]:
+            raise BaseException("[AShareIndustry] lv only can in [1, 2, 3], lv: %d not support now" % lv)
+        if dataSource is None:
+            dataSource = BarFeedConfig.get_client_config().get("AShareIndustry")
+            log.info("dataSource did't allocated, so we use init config: %s" % dataSource)
+        if dataSource == "windclient":
+            data = AShareIndustryWindClient().get_sw_industry(securityIds=securityIds,
+                                                              date_datetime=date_datetime,
+                                                              lv=lv)
+        else:
+            raise BaseException("[%s] dataSource: %s can't supply now" % dataSource)
+        if not data.empty:
+            data.sort_values(by="securityId", axis=0, ascending=True, inplace=True)
+            data.reset_index(drop=True, inplace=True)
+            data.loc[:, "dateSource"] = dataSource
+        else:
+            log.warning("%s did't get data, please check it " % securityIds)
+        return data
+
+    @staticmethod
+    def get_zx_industry(securityIds, date_datetime, lv=1, dataSource=None):
+        log = logger.get_logger(name="AShareIndustry")
+        if not isinstance(securityIds, list):
+            raise BaseException("[AShareIndustry] securityIds must be list")
+        for securityId in securityIds:
+            if not isinstance(securityId, str):
+                raise BaseException("[AShareQuotation] securityId in securityIds must be str")
+        if not isinstance(date_datetime, datetime.datetime):
+            raise BaseException("[AShareIndustry] date_datetime must be datetime.datetime")
+        if not isinstance(lv, int):
+            raise BaseException("[AShareIndustry] lv type must be int")
+        if lv not in [1, 2, 3]:
+            raise BaseException("[AShareIndustry] lv only can in [1, 2, 3], lv: %d not support now" % lv)
+        if dataSource is None:
+            dataSource = BarFeedConfig.get_client_config().get("AShareIndustry")
+            log.info("dataSource did't allocated, so we use init config: %s" % dataSource)
+        if dataSource == "windclient":
+            data = AShareIndustryWindClient().get_zx_industry(securityIds=securityIds,
+                                                              date_datetime=date_datetime,
+                                                              lv=lv)
+        else:
+            raise BaseException("[%s] dataSource: %s can't supply now" % dataSource)
+        if not data.empty:
+            data.sort_values(by="securityId", axis=0, ascending=True, inplace=True)
+            data.reset_index(drop=True, inplace=True)
+            data.loc[:, "dateSource"] = dataSource
+        else:
+            log.warning("%s did't get data, please check it " % securityIds)
+        return data
+
+    @staticmethod
+    def get_wind_industry(securityIds, date_datetime, lv=1, dataSource=None):
+        log = logger.get_logger(name="AShareIndustry")
+        if not isinstance(securityIds, list):
+            raise BaseException("[AShareIndustry] securityIds must be list")
+        for securityId in securityIds:
+            if not isinstance(securityId, str):
+                raise BaseException("[AShareQuotation] securityId in securityIds must be str")
+        if not isinstance(date_datetime, datetime.datetime):
+            raise BaseException("[AShareIndustry] date_datetime must be datetime.datetime")
+        if not isinstance(lv, int):
+            raise BaseException("[AShareIndustry] lv type must be int")
+        if lv not in [1, 2, 3]:
+            raise BaseException("[AShareIndustry] lv only can in [1, 2, 3], lv: %d not support now" % lv)
+        if dataSource is None:
+            dataSource = BarFeedConfig.get_client_config().get("AShareIndustry")
+            log.info("dataSource did't allocated, so we use init config: %s" % dataSource)
+        if dataSource == "windclient":
+            data = AShareIndustryWindClient().get_wind_industry(securityIds=securityIds,
+                                                                date_datetime=date_datetime,
+                                                                lv=lv)
+        else:
+            raise BaseException("[%s] dataSource: %s can't supply now" % dataSource)
+        if not data.empty:
+            data.sort_values(by="securityId", axis=0, ascending=True, inplace=True)
+            data.reset_index(drop=True, inplace=True)
+            data.loc[:, "dateSource"] = dataSource
+        else:
+            log.warning("%s did't get data, please check it " % securityIds)
+        return data
+
+
+
+
+
+
+
+
+
 
 
 

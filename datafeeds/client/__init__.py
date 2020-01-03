@@ -47,13 +47,7 @@ class Quotation:
         data0.reset_index(drop=True, inplace=True)
         return data0
 
-if __name__ == "__main__":
-    data = Quotation.get_quotation(securityIds=["601992.SH", "000300.SH", "RB.SHF", "TF.CFE", "510300.SH", "510300.OF",
-                                                "10002052.SH"],
-                                   items=["open", "high", "low", "close"],
-                                   frequency=86400,
-                                   begin_datetime=datetime.datetime(2019,1,1),
-                                   end_datetime=datetime.datetime(2019,12,1))
+
 
 
 
