@@ -96,8 +96,7 @@ class AShareQuotationWindDataBase(BaseWindDataBase):
         data.reset_index(inplace=True, drop=True)
         # choose items to data
         log = logger.get_logger(name=self.LOGGER_NAME)
-        default_items = BarFeedConfig.get_wind_database_items().get(self.LOGGER_NAME)
-        default_items = list(default_items.values())
+        default_items = list(rename_dict.values())
         real_items = []
         for item in items:
             if item in ["securityId", "dateTime"]:

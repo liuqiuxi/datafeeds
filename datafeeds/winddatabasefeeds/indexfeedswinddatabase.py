@@ -64,7 +64,8 @@ class AIndexQuotationWindDataBase(BaseWindDataBase):
         data.loc[:, "amount"] = data.loc[:, "amount"] * 1000
         # choose items to data
         log = logger.get_logger(name=self.LOGGER_NAME)
-        default_items = list(rename_dict.values())
+        default_items = BarFeedConfig.get_wind_database_items().get(self.LOGGER_NAME)
+        default_items = list(default_items.values())
         real_items = []
         for item in items:
             if item in ["securityId", "dateTime"]:
@@ -90,14 +91,17 @@ class AIndexWeightsWindDataBase(BaseWindDataBase):
 
     def get_index_weights(self, securityIds, date_datetime):
         data = pd.DataFrame()
+        rename_dict = self.__rename_dict
         for securityId in securityIds:
             data0 = self.__get_index_weights(securityId=securityId, date_datetime=date_datetime)
+            data0.rename(columns=rename_dict, inplace=True)
+            data0 = data0.loc[:, ["dateTime", "indexId", "securityId", "securityWeight"]].copy(deep=True)
             data = pd.concat(objs=[data, data0], axis=0, join="outer")
-        rename_dict = self.__rename_dict
-        data.rename(columns=rename_dict, inplace=True)
         data.loc[:, "dateTime"] = data.loc[:, "dateTime"].apply(lambda x: datetime.datetime.strptime(x, "%Y%m%d"))
         data.loc[:, "securityWeight"] = data.loc[:, "securityWeight"] / 100
         data = data.loc[:, ["dateTime", "indexId", "securityId", "securityWeight"]].copy(deep=True)
+        data.sort_values(by=["indexId", "securityId"], axis=0, ascending=True, inplace=True)
+        data.reset_index(drop=True, inplace=True)
         return data
 
     def __get_index_weights(self, securityId, date_datetime):
@@ -111,6 +115,7 @@ class AIndexWeightsWindDataBase(BaseWindDataBase):
         sqlClause = ("select * from " + owner + table_name + " where trade_dt = '" + date_datetime + "'")
         data = self.get_data_with_sql(sqlClause=sqlClause, connect=connect)
         data.loc[:, "indexId"] = securityId
+        connect.close()
         return data
 
 

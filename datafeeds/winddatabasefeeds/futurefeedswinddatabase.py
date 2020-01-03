@@ -26,7 +26,7 @@ class AFutureQuotationWindDataBase(BaseWindDataBase):
     def get_quotation(self, securityIds, items, frequency, begin_datetime, end_datetime, adjusted=None):
         if adjusted is not None:
             log = logger.get_logger(name=self.LOGGER_NAME)
-            log.info("Future data has no adjust price, so we change adjusted %s to None" % adjusted)
+            log.info("Future data has no adjust price, so we change adjusted to None")
         limit_numbers = BarFeedConfig.get_wind().get("LimitNumbers")
         if len(securityIds) < limit_numbers:
             data = self.__get_quotation(securityIds=securityIds, items=items, frequency=frequency,
@@ -63,6 +63,8 @@ class AFutureQuotationWindDataBase(BaseWindDataBase):
         table_name = self.__table_name_dict.get("commodity_future")
         owner = self.get_oracle_owner(table_name=table_name)
         table_parameter = owner + table_name
+        if frequency != 86400:
+            raise BaseException("[%s] we can't supply frequency: %d " % (self.LOGGER_NAME, frequency))
         if len(securityIds) == 1:
             sqlClause = ("select * from " + table_parameter + " where trade_dt >= " +
                          "'" + begin_datetime + "' and trade_dt <= '" + end_datetime + "' and s_info_windcode = " +
@@ -128,7 +130,8 @@ class AFutureQuotationWindDataBase(BaseWindDataBase):
         data.loc[:, "amount"] = data.loc[:, "amount"] * 10000
         # choose items to data
         log = logger.get_logger(name=self.LOGGER_NAME)
-        default_items = list(rename_dict.values())
+        default_items = BarFeedConfig.get_wind_database_items().get(self.LOGGER_NAME)
+        default_items = list(default_items.values())
         real_items = []
         for item in items:
             if item in ["securityId", "dateTime"]:
