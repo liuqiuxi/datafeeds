@@ -17,6 +17,7 @@ from datafeeds.windclientfeeds.stockfeedswindclient import AShareCalendarWindCli
 from datafeeds.winddatabasefeeds.stockfeedswinddatabase import AShareQuotationWindDataBase
 from datafeeds.jqdatafeeds.stockfeedsjqdata import AShareQuotationJqData
 from datafeeds.windclientfeeds.stockfeedswindclient import AShareIndustryWindClient
+from datafeeds.winddatabasefeeds.stockfeedswinddatabase import AShareIPOWindDataBase
 
 
 class AShareCalendar:
@@ -42,7 +43,7 @@ class AShareCalendar:
         elif dataSource == "windclient":
             data = AShareCalendarWindClient().get_calendar(begin_datetime=begin_datetime, end_datetime=end_datetime)
         else:
-            raise BaseException("[%s] dataSource: %s can't supply now" % dataSource)
+            raise BaseException("[AShareCalendar] dataSource: %s can't supply now" % dataSource)
         data.loc[:, "dateSource"] = dataSource
         data.drop_duplicates(subset=["dateTime"], inplace=True)
         data.sort_values(by="dateTime", axis=0, ascending=True, inplace=True)
@@ -89,7 +90,7 @@ class AShareQuotation:
                                                          frequency=frequency, begin_datetime=begin_datetime,
                                                          end_datetime=end_datetime, adjusted=adjusted)
         else:
-            raise BaseException("[%s] dataSource: %s can't supply now" % dataSource)
+            raise BaseException("[AShareQuotation] dataSource: %s can't supply now" % dataSource)
         if not data.empty:
             data.sort_values(by=["securityId", "dateTime"], axis=0, ascending=True, inplace=True)
             data.reset_index(drop=True, inplace=True)
@@ -123,7 +124,7 @@ class AShareIndustry:
                                                               date_datetime=date_datetime,
                                                               lv=lv)
         else:
-            raise BaseException("[%s] dataSource: %s can't supply now" % dataSource)
+            raise BaseException("[AShareIndustry] dataSource: %s can't supply now" % dataSource)
         if not data.empty:
             data.sort_values(by="securityId", axis=0, ascending=True, inplace=True)
             data.reset_index(drop=True, inplace=True)
@@ -154,7 +155,7 @@ class AShareIndustry:
                                                               date_datetime=date_datetime,
                                                               lv=lv)
         else:
-            raise BaseException("[%s] dataSource: %s can't supply now" % dataSource)
+            raise BaseException("[AShareIndustry] dataSource: %s can't supply now" % dataSource)
         if not data.empty:
             data.sort_values(by="securityId", axis=0, ascending=True, inplace=True)
             data.reset_index(drop=True, inplace=True)
@@ -185,7 +186,7 @@ class AShareIndustry:
                                                                 date_datetime=date_datetime,
                                                                 lv=lv)
         else:
-            raise BaseException("[%s] dataSource: %s can't supply now" % dataSource)
+            raise BaseException("[AShareIndustry] dataSource: %s can't supply now" % dataSource)
         if not data.empty:
             data.sort_values(by="securityId", axis=0, ascending=True, inplace=True)
             data.reset_index(drop=True, inplace=True)
@@ -194,6 +195,31 @@ class AShareIndustry:
             log.warning("%s did't get data, please check it " % securityIds)
         return data
 
+
+class AShareIPO:
+
+    @staticmethod
+    def get_initial_public_offering(securityIds, dataSource=None):
+        log = logger.get_logger(name="AShareIPO")
+        if not isinstance(securityIds, list):
+            raise BaseException("[AShareIPO] securityIds must be list")
+        for securityId in securityIds:
+            if not isinstance(securityId, str):
+                raise BaseException("[AShareIPO] securityId in securityIds must be str")
+        if dataSource is None:
+            dataSource = BarFeedConfig.get_client_config().get("AShareIPO")
+            log.info("dataSource did't allocated, so we use init config: %s" % dataSource)
+        if dataSource == "wind":
+            data = AShareIPOWindDataBase().get_initial_public_offering(securityIds=securityIds)
+        else:
+            raise BaseException("[AShareIPO] dataSource: %s can't supply now" % dataSource)
+        if not data.empty:
+            data.sort_values(by="securityId", axis=0, ascending=True, inplace=True)
+            data.reset_index(drop=True, inplace=True)
+            data.loc[:, "dateSource"] = dataSource
+        else:
+            log.warning("%s did't get data, please check it " % securityIds)
+        return data
 
 
 
