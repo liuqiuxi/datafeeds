@@ -19,7 +19,7 @@ class BarFeedConfig:
                   "indexExchange": ["MSCI", "CSI", "SSE", "SZSE", "CICC", "SW", "OTH"],
                   "fundExchange": ["E", "O"],
                   "optionExchange": ["CZCE", "SHFE", "DCE", "SSE"],
-                  "LimitNumbers": {"daily_quotation": 4000
+                  "LimitNumbers": {"min_quotation_wait": 30
                                    }
                   }
         return config
@@ -125,6 +125,15 @@ class BarFeedConfig:
                                              "volume": "volume", "money": "amount"},
                   "AFundQuotationJqData": {"open": "open", "high": "high", "low": "low", "close": "close",
                                            "volume": "volume", "money": "amount"}
+
+                  }
+        return config
+
+    @staticmethod
+    def get_tushare_items():
+        config = {"AShareQuotationTuShare": {"ts_code": "securityId",  "open": "open", "high": "high", "low": "low",
+                                             "close": "close", "pre_close": "preClose", "change": "cash_change",
+                                              "pct_chg": "Chg", "vol": "volume", "amount": "amount"}
 
                   }
         return config
