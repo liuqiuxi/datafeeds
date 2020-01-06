@@ -151,6 +151,24 @@ class BaseTuShare(metaclass=abc.ABCMeta):
             data.reset_index(drop=True, inplace=True)
         return data
 
+    @staticmethod
+    def get_frequency_cycle(frequency):
+        if not isinstance(frequency, (int, float)):
+            raise BaseException("[BaseTuShare] frequency type only can be int or float")
+        if frequency not in [60, 300, 900, 1800, 3600, 86400, 604800, 2592000]:
+            raise BaseException("[BaseTuShare] frequency not support %d frequency" % frequency)
+        if frequency == 86400:
+            cycle = "D"
+        elif frequency < 86400:
+            cycle = str(int(frequency / 60)) + "min"
+        elif frequency == 604800:
+            cycle = "W"
+        elif frequency == 2592000:
+            cycle = "M"
+        else:
+            raise BaseException("[BaseTuShare] something may have problem")
+        return cycle
+
 
 
 
