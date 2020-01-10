@@ -14,12 +14,12 @@ class BarFeedConfig:
 
     @staticmethod
     def get_tushare():
-        config = {"token": "",
+        config = {"token": "592204bae01431106102416727abc9b4a40e56841722d3ab66c2a466",
                   "futureExchange": ["CFFEX", "DCE", "CZCE", "SHFE", "INE"],
                   "indexExchange": ["MSCI", "CSI", "SSE", "SZSE", "CICC", "SW", "OTH"],
                   "fundExchange": ["E", "O"],
                   "optionExchange": ["CZCE", "SHFE", "DCE", "SSE"],
-                  "LimitNumbers": {"min_quotation_wait": 30
+                  "LimitNumbers": {"daily_quotation": 4000
                                    }
                   }
         return config
@@ -60,7 +60,9 @@ class BarFeedConfig:
                   "AOptionQuotation": "wind",
                   "AFundQuotation": "wind",
                   "AIndexWeights": "wind",
-                  "AShareIndustry": "windclient"
+                  "AShareIndustry": "windclient",
+                  "AShareIPO": "wind",
+                  "AShareDayVars": "wind"
                   }
         return config
 
@@ -109,7 +111,17 @@ class BarFeedConfig:
                   "AShareIPOWindDataBase": {"s_info_windcode": "securityId", "s_ipo_price": "ipoPrice",
                                             "s_ipo_ pre_ dilutedpe": "predilutedPE", "s_ipo_dilutedpe": "dilutedPE",
                                             "s_ipo_amount": "amount", "s_ipo_collection": "collection",
-                                            "s_ipo_subdate": "subDate", "s_ipo_listdate": "listDate"}
+                                            "s_ipo_subdate": "subDate", "s_ipo_listdate": "listDate"},
+
+                  "AShareDayVarsWindDataBase": {"s_info_windcode": "securityId", "trade_dt": "dateTime",
+                                                "s_val_mv": "totalValue", "s_dq_mv": "marketValue", "s_val_pe": "PE",
+                                                "s_val_pb_new": "PB", "s_val_pe_ttm": "PE_TTM",
+                                                "s_val_pcf_ocf": "PCF_OCF", "s_val_pcf_ocfttm": "PCF_OCF_TTM",
+                                                "s_val_pcf_ncf": "PCF_NCF", "s_val_pcf_ncfttm": "PCF_NCF_TTM",
+                                                "s_val_ps": "PS", "s_val_ps_ttm": "PS_TTM", "s_dq_turn": "turnover",
+                                                "s_dq_freeturnover": "turnover_free", "s_dq_close_today": "close",
+                                                "up_down_limit_status": "upOrdown"}
+
                   }
         return config
 
@@ -124,16 +136,17 @@ class BarFeedConfig:
                   "AOptionQuotationJqData": {"open": "open", "high": "high", "low": "low", "close": "close",
                                              "volume": "volume", "money": "amount"},
                   "AFundQuotationJqData": {"open": "open", "high": "high", "low": "low", "close": "close",
-                                           "volume": "volume", "money": "amount"}
+                                           "volume": "volume", "money": "amount", "code": "securityId",
+                                           "day": "dateTime", "net_value": "close", "acc_factor": "adjfactor"}
 
                   }
         return config
 
     @staticmethod
     def get_tushare_items():
-        config = {"AShareQuotationTuShare": {"ts_code": "securityId",  "open": "open", "high": "high", "low": "low",
+        config = {"AShareQuotationTuShare": {"ts_code": "securityId", "open": "open", "high": "high", "low": "low",
                                              "close": "close", "pre_close": "preClose", "change": "cash_change",
-                                              "pct_chg": "Chg", "vol": "volume", "amount": "amount"}
+                                             "pct_chg": "Chg", "vol": "volume", "amount": "amount"}
 
                   }
         return config
