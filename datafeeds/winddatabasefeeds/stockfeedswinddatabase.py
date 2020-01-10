@@ -10,6 +10,7 @@
 import datetime
 import copy
 import pandas as pd
+import numpy as np
 from datafeeds.utils import BarFeedConfig
 from datafeeds.winddatabasefeeds import BaseWindDataBase
 from datafeeds import logger
@@ -157,6 +158,78 @@ class AShareIPOWindDataBase(BaseWindDataBase):
         data.sort_values(by="securityId", axis=0, ascending=True, inplace=True)
         data.reset_index(inplace=True, drop=True)
         return data
+
+
+class AShareDayVarsWindDataBase(BaseWindDataBase):
+    LOGGER_NAME = "AShareDayVarsWindDataBase"
+
+    def __init__(self):
+        super(AShareDayVarsWindDataBase, self).__init__()
+        self.__table_name_dict = {"AShareDayVarsWindDataBase": ["AShareEODDerivativeIndicator",
+                                                                "AShareEODPrices",
+                                                                "AShareST"]}
+
+    def get_value(self, date_datetime):
+        connect = self.connect()
+        table_name = self.__table_name_dict.get(self.LOGGER_NAME)[0]
+        owner = self.get_oracle_owner(table_name=table_name)
+        table_parameter = owner + table_name
+        date_datetime = date_datetime.strftime("%Y%m%d")
+        sqlClause = "select * from " + table_parameter + " where trade_dt = "+ date_datetime +""
+        data = self.get_data_with_sql(sqlClause=sqlClause, connect=connect)
+        default_items = list(BarFeedConfig.get_wind_database_items().get(self.LOGGER_NAME))
+        drop_items = list(set(data.columns) - set(default_items))
+        data.drop(labels=drop_items, axis=1, inplace=True)
+        rename_dict = BarFeedConfig.get_wind_database_items().get(self.LOGGER_NAME)
+        data.rename(columns=rename_dict, inplace=True)
+        # change parameters numbers
+        data.loc[:, "dateTime"] = data.loc[:, "dateTime"].apply(lambda x: datetime.datetime.strptime(x, "%Y%m%d"))
+        data.loc[:, "upLimit"] = np.where(data.loc[:, "upOrdown"] == 1, True, False)
+        data.loc[:, "downLimit"] = np.where(data.loc[:, "upOrdown"] == -1, True, False)
+        data.loc[:, "turnover"] = data.loc[:, "turnover"] / 100
+        data.loc[:, "turnover_free"] = data.loc[:, "turnover_free"] / 100
+        data.loc[:, "totalValue"] = data.loc[:, "totalValue"] * 10000
+        data.loc[:, "marketValue"] = data.loc[:, "marketValue"] * 10000
+        data.drop(labels=["upOrdown"], axis=1, inplace=True)
+        # find stock whether suspend
+        table_name = self.__table_name_dict.get(self.LOGGER_NAME)[1]
+        owner = self.get_oracle_owner(table_name=table_name)
+        table_parameter = owner + table_name
+        sqlClause = ("select s_info_windcode, trade_dt, s_dq_tradestatus from " + table_parameter + " " \
+                    "where trade_dt = '"+ date_datetime +"'")
+        data0 = self.get_data_with_sql(sqlClause=sqlClause, connect=connect)
+        data0.rename(columns=rename_dict, inplace=True)
+        data0.loc[:, "dateTime"] = data0.loc[:, "dateTime"].apply(lambda x: datetime.datetime.strptime(x, "%Y%m%d"))
+        data0.loc[:, "isNotSuspended"] = np.where(data0.loc[:, "s_dq_tradestatus"] == "交易", True, False)
+        data0 = data0.loc[:, ["securityId", "dateTime", "isNotSuspended"]].copy(deep=True)
+        data = pd.merge(left=data, right=data0, how="outer", on=("dateTime", "securityId"))
+        # find stock whether ST
+        table_name = self.__table_name_dict.get(self.LOGGER_NAME)[2]
+        owner = self.get_oracle_owner(table_name=table_name)
+        table_parameter = owner + table_name
+        sqlClause = ("select s_info_windcode, entry_dt, remove_dt, s_type_st from " + table_parameter + " " \
+                     "where entry_dt <= '" + date_datetime + "'")
+        data0 = self.get_data_with_sql(sqlClause=sqlClause, connect=connect)
+        data0.rename(columns=rename_dict, inplace=True)
+        data0.loc[:, "entry_dt"] = data0.loc[:, "entry_dt"].apply(lambda x: datetime.datetime.strptime(x, "%Y%m%d"))
+        data0.loc[:, "remove_dt"] = data0.loc[:, "remove_dt"].apply(
+            lambda x: np.nan if x == None else datetime.datetime.strptime(x, "%Y%m%d"))
+        date_datetime = datetime.datetime.strptime(date_datetime, "%Y%m%d")
+        data0.loc[:, "isST"] = np.where(pd.isnull(data0.loc[:, "remove_dt"]), True,
+                                        np.where(data0.loc[:, "remove_dt"] > date_datetime, True, False))
+        data0 = data0.loc[data0.loc[:, "isST"] == True, ["securityId", "isST"]].copy(deep=True)
+        data = pd.merge(left=data, right=data0, how="left", on="securityId")
+        data.loc[:, "isST"] = np.where(data.loc[:, "isST"] == True, True, False)
+        return data
+
+
+
+
+
+
+
+
+
 
 
 
