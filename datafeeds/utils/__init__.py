@@ -14,12 +14,12 @@ class BarFeedConfig:
 
     @staticmethod
     def get_tushare():
-        config = {"token": "592204bae01431106102416727abc9b4a40e56841722d3ab66c2a466",
+        config = {"token": "",
                   "futureExchange": ["CFFEX", "DCE", "CZCE", "SHFE", "INE"],
                   "indexExchange": ["MSCI", "CSI", "SSE", "SZSE", "CICC", "SW", "OTH"],
                   "fundExchange": ["E", "O"],
                   "optionExchange": ["CZCE", "SHFE", "DCE", "SSE"],
-                  "LimitNumbers": {"daily_quotation": 4000
+                  "LimitNumbers": {"min_quotation_wait": 30
                                    }
                   }
         return config
@@ -146,13 +146,14 @@ class BarFeedConfig:
     def get_tushare_items():
         config = {"AShareQuotationTuShare": {"ts_code": "securityId", "open": "open", "high": "high", "low": "low",
                                              "close": "close", "pre_close": "preClose", "change": "cash_change",
-                                             "pct_chg": "Chg", "vol": "volume", "amount": "amount"}
+                                             "pct_chg": "Chg", "vol": "volume", "amount": "amount"},
+
+                  "AFutureQuotationTuShare": {"ts_code": "securityId", "pre_close": "preClose",
+                                              "pre_settle": "preSettle", "open": "open", "high": "high", "low": "low",
+                                              "close": "close", "settle": "settle",
+                                              "change1": "cash_change_close_to_settle",
+                                              "change2": "cash_change_settle_to_settle", "vol": "volume",
+                                              "amount": "amount", "oi": "openInterest", "oi_chg": "openInterestChange"}
 
                   }
         return config
-
-
-
-
-
-

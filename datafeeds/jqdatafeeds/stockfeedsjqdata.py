@@ -53,7 +53,6 @@ class AShareQuotationJqData(BaseJqData):
             data0.loc[:, "dateTime"] = data0.index
             securityId = self.default_to_wind(securityIds=[securityId])
             data0.loc[:, "securityId"] = securityId
-
             data = pd.concat(objs=[data, data0], axis=0, join="outer")
         data.rename(columns=rename_dict, inplace=True)
         # choose items to data

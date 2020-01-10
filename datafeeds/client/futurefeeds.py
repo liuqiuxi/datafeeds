@@ -12,6 +12,7 @@ from datafeeds import logger
 from datafeeds.utils import BarFeedConfig
 from datafeeds.winddatabasefeeds.futurefeedswinddatabase import AFutureQuotationWindDataBase
 from datafeeds.jqdatafeeds.futurefeedsjqdata import AFutureQuotationJqData
+from datafeeds.tusharefeeds.futurefeedstushare import AFutureQuotationTuShare
 
 
 class AFutureQuotation:
@@ -52,6 +53,10 @@ class AFutureQuotation:
             data = AFutureQuotationJqData().get_quotation(securityIds=securityIds, items=items,
                                                           frequency=frequency, begin_datetime=begin_datetime,
                                                           end_datetime=end_datetime, adjusted=adjusted)
+        elif dataSource == "tushare":
+            data = AFutureQuotationTuShare().get_quotation(securityIds=securityIds, items=items, frequency=frequency,
+                                                           begin_datetime=begin_datetime, end_datetime=end_datetime,
+                                                           adjusted=adjusted)
         else:
             raise BaseException("[%s] dataSource: %s can't supply now" % dataSource)
         if not data.empty:
