@@ -18,6 +18,7 @@ from datafeeds.winddatabasefeeds.stockfeedswinddatabase import AShareQuotationWi
 from datafeeds.jqdatafeeds.stockfeedsjqdata import AShareQuotationJqData
 from datafeeds.windclientfeeds.stockfeedswindclient import AShareIndustryWindClient
 from datafeeds.winddatabasefeeds.stockfeedswinddatabase import AShareIPOWindDataBase
+from datafeeds.winddatabasefeeds.stockfeedswinddatabase import AShareDayVarsWindDataBase
 
 
 class AShareCalendar:
@@ -220,6 +221,30 @@ class AShareIPO:
         else:
             log.warning("%s did't get data, please check it " % securityIds)
         return data
+
+class AShareDayVars:
+
+    @staticmethod
+    def get_value(date_datetime, dataSource=None):
+        log = logger.get_logger(name="AShareDayVars")
+        if not isinstance(date_datetime, datetime.datetime):
+            raise BaseException("[AShareDayVars] date_datetime must be datetime.datetime")
+        if dataSource is None:
+            dataSource = BarFeedConfig.get_client_config().get("AShareDayVars")
+            log.info("dataSource did't allocated, so we use init config: %s" % dataSource)
+        if dataSource == "wind":
+            data = AShareDayVarsWindDataBase().get_value(date_datetime=date_datetime)
+        else:
+            raise BaseException("[AShareDayVars] dataSource: %s can't supply now" % dataSource)
+        if not data.empty:
+            data.sort_values(by="securityId", axis=0, ascending=True, inplace=True)
+            data.reset_index(drop=True, inplace=True)
+            data.loc[:, "dateSource"] = dataSource
+        else:
+            log.warning("%s did't get data, please check it " % securityIds)
+        return data
+
+
 
 
 
