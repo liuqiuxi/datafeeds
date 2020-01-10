@@ -152,9 +152,9 @@ class AShareIPOWindDataBase(BaseWindDataBase):
         data.loc[:, "amount"] = data.loc[:, "amount"] * 10000
         data.loc[:, "collection"] = data.loc[:, "collection"] * 10000
         data.loc[:, "subDate"] = data.loc[:, "subDate"].apply(
-            lambda x: None if x is None else datetime.datetime.strptime(x, "%Y%m%d"))
+            lambda x: datetime.datetime.strptime(x, "%Y%m%d") if isinstance(x, datetime.datetime) else None)
         data.loc[:, "listDate"] = data.loc[:, "listDate"].apply(
-            lambda x: None if x is None else datetime.datetime.strptime(x, "%Y%m%d"))
+            lambda x: datetime.datetime.strptime(x, "%Y%m%d") if isinstance(x, datetime.datetime) else None)
         data.sort_values(by="securityId", axis=0, ascending=True, inplace=True)
         data.reset_index(inplace=True, drop=True)
         return data
