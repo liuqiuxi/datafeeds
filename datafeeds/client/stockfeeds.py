@@ -20,6 +20,8 @@ from datafeeds.tusharefeeds.stockfeedstushare import AShareQuotationTuShare
 from datafeeds.windclientfeeds.stockfeedswindclient import AShareIndustryWindClient
 from datafeeds.winddatabasefeeds.stockfeedswinddatabase import AShareIPOWindDataBase
 from datafeeds.winddatabasefeeds.stockfeedswinddatabase import AShareDayVarsWindDataBase
+from datafeeds.jqdatafeeds.stockfeedsjqdata import AShareDayVarsJqData
+from datafeeds.jqdatafeeds.stockfeedsjqdata import AShareIndustryJqData
 
 
 class AShareCalendar:
@@ -127,8 +129,9 @@ class AShareIndustry:
             log.info("dataSource did't allocated, so we use init config: %s" % dataSource)
         if dataSource == "windclient":
             data = AShareIndustryWindClient().get_sw_industry(securityIds=securityIds,
-                                                              date_datetime=date_datetime,
-                                                              lv=lv)
+                                                              ate_datetime=date_datetime, lv=lv)
+        elif dataSource == "jqdata":
+            data = AShareIndustryJqData().get_sw_industry(securityIds=securityIds, date_datetime=date_datetime, lv=lv)
         else:
             raise BaseException("[AShareIndustry] dataSource: %s can't supply now" % dataSource)
         if not data.empty:
@@ -240,6 +243,8 @@ class AShareDayVars:
             log.info("dataSource did't allocated, so we use init config: %s" % dataSource)
         if dataSource == "wind":
             data = AShareDayVarsWindDataBase().get_value(date_datetime=date_datetime)
+        elif dataSource == "jqdata":
+            data = AShareDayVarsJqData().get_value(date_datetime=date_datetime)
         else:
             raise BaseException("[AShareDayVars] dataSource: %s can't supply now" % dataSource)
         if not data.empty:
