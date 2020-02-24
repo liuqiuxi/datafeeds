@@ -129,9 +129,12 @@ class AShareIndustry:
             log.info("dataSource did't allocated, so we use init config: %s" % dataSource)
         if dataSource == "windclient":
             data = AShareIndustryWindClient().get_sw_industry(securityIds=securityIds,
-                                                              ate_datetime=date_datetime, lv=lv)
+                                                              date_datetime=date_datetime,
+                                                              lv=lv)
         elif dataSource == "jqdata":
-            data = AShareIndustryJqData().get_sw_industry(securityIds=securityIds, date_datetime=date_datetime, lv=lv)
+            data = AShareIndustryJqData().get_sw_industry(securityIds=securityIds,
+                                                          ate_datetime=date_datetime,
+                                                          lv=lv)
         else:
             raise BaseException("[AShareIndustry] dataSource: %s can't supply now" % dataSource)
         if not data.empty:
