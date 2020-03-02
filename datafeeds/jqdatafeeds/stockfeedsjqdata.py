@@ -9,6 +9,7 @@
 
 import datetime
 import pandas as pd
+import numpy as np
 from datafeeds.jqdatafeeds import BaseJqData
 from datafeeds.utils import BarFeedConfig
 from datafeeds import logger
@@ -69,6 +70,71 @@ class AShareQuotationJqData(BaseJqData):
         data = data.loc[:, ["dateTime", "securityId"] + real_items].copy(deep=True)
         connect.logout()
         return data
+
+
+class AShareDayVarsJqData(BaseJqData):
+
+    def __init__(self):
+        super(AShareDayVarsJqData, self).__init__()
+
+    def get_value(self, date_datetime):
+        connect = self.connect()
+        data = connect.get_all_securities(types=["stock"], date=date_datetime)
+        data.loc[:, "securityId"] = self.default_to_wind(securityIds=list(data.index))
+        data = data.loc[:, ["securityId", "start_date"]].copy(deep=True)
+        data.loc[:, "code"] = data.index
+        valuation = connect.valuation
+        query = connect.query(valuation.code, valuation.market_cap, valuation.circulating_market_cap,
+                              valuation.pe_ratio, valuation.turnover_ratio, valuation.pb_ratio
+                              ).filter(connect.valuation.code.in_(list(data.index)))
+        data0 = connect.get_fundamentals(query_object=query, date=date_datetime)
+        data = pd.merge(left=data, right=data0, how="left", on="code")
+        # 市值和总市值转化为元
+        data.loc[:, "circulating_market_cap"] = data.loc[:, "circulating_market_cap"] * 100000000
+        data.loc[:, "market_cap"] = data.loc[:, "market_cap"] * 100000000
+        # 换手率转化为基本单位
+        data.loc[:, "turnover_ratio"] = data.loc[:, "turnover_ratio"] / 100
+        # jQDATA暂时未有ST和停牌数据，以后有了再补充
+        data.rename(columns={"start_date": "listDate", "market_cap": "totalValue", "pe_ratio": "PE_TTM",
+                             "pb_ratio": "PB", "circulating_market_cap": "marketValue", "turnover_ratio": "turnover"},
+                    inplace=True)
+        data.loc[:, "dateTime"] = date_datetime
+        data = data.loc[:, ["dateTime", "securityId", "marketValue", "totalValue",
+                            "turnover", "PE_TTM", "PB", "listDate"]].copy(deep=True)
+        connect.logout()
+        return data
+
+
+class AShareIndustryJqData(BaseJqData):
+
+    def __init__(self):
+        super(AShareIndustryJqData, self).__init__()
+
+    def get_sw_industry(self, securityIds, date_datetime, lv):
+        connect = self.connect()
+        securityIds = self.wind_to_default(securityIds=securityIds)
+        data0 = connect.get_industry(security=securityIds, date=date_datetime)
+        data = pd.DataFrame(data={"securityId": securityIds})
+        # get SW key level
+        key = "sw_l" + str(lv)
+        data.loc[:, "industryName"] = data.loc[:, "securityId"].apply(lambda x: data0.get(x, np.nan))
+        data.loc[:, "industryName"] = data.loc[:, "industryName"].apply(
+            lambda x: x.get(key) if isinstance(x, dict) else np.nan)
+        data.loc[:, "industryName"] = data.loc[:, "industryName"].apply(
+            lambda x: x.get("industry_name", np.nan) if isinstance(x, dict) else np.nan)
+        data.loc[:, "securityId"] = self.default_to_wind(securityIds=list(data.loc[:, "securityId"]))
+        data.loc[:, "dateTime"] = date_datetime
+        connect.logout()
+        return data
+
+
+
+
+
+
+
+
+
 
 
 
