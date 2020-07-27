@@ -7,9 +7,9 @@
 # @Software: PyCharm
 # @Remark  : This is class of option market
 
+import pandas as pd
 import datetime
 import copy
-import pandas as pd
 from datafeeds.jqdatafeeds import BaseJqData
 from datafeeds.utils import BarFeedConfig
 from datafeeds import logger
@@ -164,6 +164,30 @@ class AFundQuotationJqData(BaseJqData):
         for column in columns:
             data.loc[:, column] = data.loc[:, column] * data.loc[:, "adjfactor"]
         return data
+    
+    
+class AFundDayVarsJqData(BaseJqData):
+    LOGGER_NAME = "AFundDayVarsJqData"
+    
+    def __init__(self):
+        super(AFundDayVarsJqData, self).__init__()
+        
+    def get_value(self, date_datetime):
+        connect = self.connect()
+        data = connect.finance.run_query(connect.query(
+                connect.finance.FUND_SHARE_DAILY).filter(connect.finance.FUND_SHARE_DAILY.date==date_datetime.strftime("%Y-%m-%d"))) 
+        data.loc[:, "code"] = self.default_to_wind(securityIds=list(data.loc[:, "code"]))
+        data = data.loc[:, ["date", "code", "shares"]].rename(columns={"date": "dateTime", "code": "securityId"}).copy(deep=True)
+        data.loc[:, "dateTime"] = data.loc[:, "dateTime"].apply(
+            lambda x: datetime.datetime.combine(x, datetime.datetime.min.time()))
+        connect.logout()
+        return data
+        
+        
+        
+    
+
+
 
 
 
