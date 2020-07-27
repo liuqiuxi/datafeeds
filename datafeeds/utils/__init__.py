@@ -62,7 +62,8 @@ class BarFeedConfig:
                   "AIndexWeights": "wind",
                   "AShareIndustry": "windclient",
                   "AShareIPO": "wind",
-                  "AShareDayVars": "wind"
+                  "AShareDayVars": "wind",
+                  "AFundDayVars": "jqdata"
                   }
         return config
 
