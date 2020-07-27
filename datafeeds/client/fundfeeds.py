@@ -12,6 +12,7 @@ from datafeeds.utils import BarFeedConfig
 from datafeeds import logger
 from datafeeds.winddatabasefeeds.fundfeedswinddatabase import AFundQuotationWindDataBase
 from datafeeds.jqdatafeeds.fundfeedsjqdata import AFundQuotationJqData
+from datafeeds.jqdatafeeds.fundfeedsjqdata import AFundDayVarsJqData
 
 
 class AFundQuotation:
@@ -60,4 +61,27 @@ class AFundQuotation:
             data.loc[:, "dateSource"] = dataSource
         else:
             log.warning("%s did't get data, please check it " % securityIds)
+        return data
+    
+    
+class AFundDayVars:
+
+    @staticmethod
+    def get_value(date_datetime, dataSource=None):
+        log = logger.get_logger(name="AFundDayVars")
+        if not isinstance(date_datetime, datetime.datetime):
+            raise BaseException("[AFundDayVars] date_datetime must be datetime.datetime")
+        if dataSource is None:
+            dataSource = BarFeedConfig.get_client_config().get("AFundDayVars")
+            log.info("dataSource did't allocated, so we use init config: %s" % dataSource)
+        if dataSource == "jqdata":
+            data = AFundDayVarsJqData().get_value(date_datetime=date_datetime)
+        else:
+            raise BaseException("[AShareDayVars] dataSource: %s can't supply now" % dataSource)
+        if not data.empty:
+            data.sort_values(by="securityId", axis=0, ascending=True, inplace=True)
+            data.reset_index(drop=True, inplace=True)
+            data.loc[:, "dateSource"] = dataSource
+        else:
+            log.warning("%s did't get data, please check it " % date_datetime)
         return data
