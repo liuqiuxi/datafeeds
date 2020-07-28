@@ -11,6 +11,18 @@ import logging
 
 
 class BarFeedConfig:
+    
+    @staticmethod
+    def get_pilot():
+        config = {"PILOT_ENV": "PROD",
+                  "PILOT_DOMAIN": "IDEA",
+                  "PILOT_REGION": "SZ",
+                  "LogLevel": logging.DEBUG,
+                  "USERNAME": "",
+                  "PASSWORD": "",
+                  "ACCESS_POINT": "Python"
+                  }
+        return config
 
     @staticmethod
     def get_tushare():
@@ -19,7 +31,7 @@ class BarFeedConfig:
                   "indexExchange": ["MSCI", "CSI", "SSE", "SZSE", "CICC", "SW", "OTH"],
                   "fundExchange": ["E", "O"],
                   "optionExchange": ["CZCE", "SHFE", "DCE", "SSE"],
-                  "LimitNumbers": {"min_quotation_wait": 30
+                  "LimitNumbers": {"daily_quotation": 4000
                                    }
                   }
         return config
@@ -53,7 +65,7 @@ class BarFeedConfig:
 
     @staticmethod
     def get_client_config():
-        config = {"AShareCalendar": "jqdata",
+        config = {"AShareCalendar": "wind",
                   "AShareQuotation": "wind",
                   "AIndexQuotation": "wind",
                   "AFutureQuotation": "wind",
@@ -147,14 +159,20 @@ class BarFeedConfig:
     def get_tushare_items():
         config = {"AShareQuotationTuShare": {"ts_code": "securityId", "open": "open", "high": "high", "low": "low",
                                              "close": "close", "pre_close": "preClose", "change": "cash_change",
-                                             "pct_chg": "Chg", "vol": "volume", "amount": "amount"},
-
-                  "AFutureQuotationTuShare": {"ts_code": "securityId", "pre_close": "preClose",
-                                              "pre_settle": "preSettle", "open": "open", "high": "high", "low": "low",
-                                              "close": "close", "settle": "settle",
-                                              "change1": "cash_change_close_to_settle",
-                                              "change2": "cash_change_settle_to_settle", "vol": "volume",
-                                              "amount": "amount", "oi": "openInterest", "oi_chg": "openInterestChange"}
+                                             "pct_chg": "Chg", "vol": "volume", "amount": "amount"}
 
                   }
         return config
+    
+    @staticmethod
+    def get_windclient_items():
+        config = {"AFundQuotationWindClient": {"open": "open", "high": "high", "low": "low", "close": "close", "volume": "volume",
+                                               "pre_close": "preClose", "amt": "amount", "pct_chg": "Chg"}
+                 }
+        return config
+
+
+
+
+
+
