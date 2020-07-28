@@ -17,7 +17,7 @@ class AFundQuotationWindClient(BaseWindClient):
     def __init__(self):
         super(AFundQuotationWindClient, self).__init__()
         self.__adjust_name_dict = {"F": "PriceAdj=F", "B": "PriceAdj=B"}
-        
+        self.__items = {"preClose": "pre_close", "amount": "amt"}
         self.__logger = logger.get_logger(name=self.LOGGER_NAME)
         
     def get_quotation(self, securityIds, items, frequency, begin_datetime, end_datetime, adjusted=None):
@@ -30,6 +30,8 @@ class AFundQuotationWindClient(BaseWindClient):
         #format items
         clientItems = ""
         for item in items:
+            if item in self.__items.keys():
+                item = self.__items.get(item)
             clientItems = clientItems + item + ","
         clientItems = clientItems[:-1]
         #get adjusted
@@ -54,6 +56,7 @@ class AFundQuotationWindClient(BaseWindClient):
                 log.warning("item %s not in default items, so we remove this item to data" % item)
         data = data.loc[:, ["dateTime", "securityId"] + real_items].copy(deep=True)
         connect.stop()
+        return data
                 
                 
             
