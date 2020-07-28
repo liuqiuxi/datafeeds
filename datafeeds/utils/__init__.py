@@ -18,15 +18,15 @@ class BarFeedConfig:
                   "PILOT_DOMAIN": "IDEA",
                   "PILOT_REGION": "SZ",
                   "LogLevel": logging.DEBUG,
-                  "USERNAME": "",
-                  "PASSWORD": "",
+                  "USERNAME": "liuqiuxi982",
+                  "PASSWORD": "133saisai",
                   "ACCESS_POINT": "Python"
                   }
         return config
 
     @staticmethod
     def get_tushare():
-        config = {"token": "",
+        config = {"token": "592204bae01431106102416727abc9b4a40e56841722d3ab66c2a466",
                   "futureExchange": ["CFFEX", "DCE", "CZCE", "SHFE", "INE"],
                   "indexExchange": ["MSCI", "CSI", "SSE", "SZSE", "CICC", "SW", "OTH"],
                   "fundExchange": ["E", "O"],
@@ -38,19 +38,19 @@ class BarFeedConfig:
 
     @staticmethod
     def get_wind():
-        config = {"Server": "",
-                  "Port": "",
-                  "DateBase": "",
-                  "UserId": "",
-                  "PassWord": "",
+        config = {"Server": "26.4.0.60",
+                  "Port": "1522",
+                  "DateBase": "wideaprd",
+                  "UserId": "ideawindprd_ro",
+                  "PassWord": "paic12345",
                   "LimitNumbers": 1000
                   }
         return config
 
     @staticmethod
     def get_jqdata():
-        config = {"username": "",
-                  "password": ""
+        config = {"username": "18244236905",
+                  "password": "123456abc"
                   }
         return config
 
@@ -159,8 +159,13 @@ class BarFeedConfig:
     def get_tushare_items():
         config = {"AShareQuotationTuShare": {"ts_code": "securityId", "open": "open", "high": "high", "low": "low",
                                              "close": "close", "pre_close": "preClose", "change": "cash_change",
-                                             "pct_chg": "Chg", "vol": "volume", "amount": "amount"}
-
+                                             "pct_chg": "Chg", "vol": "volume", "amount": "amount"},
+                 "AFutureQuotationTuShare": {"ts_code": "securityId", "pre_close": "preClose",
+                                              "pre_settle": "preSettle", "open": "open", "high": "high", "low": "low",
+                                              "close": "close", "settle": "settle",
+                                              "change1": "cash_change_close_to_settle",
+                                              "change2": "cash_change_settle_to_settle", "vol": "volume",
+                                              "amount": "amount", "oi": "openInterest", "oi_chg": "openInterestChange"}
                   }
         return config
     
