@@ -13,6 +13,7 @@ from datafeeds import logger
 from datafeeds.winddatabasefeeds.fundfeedswinddatabase import AFundQuotationWindDataBase
 from datafeeds.jqdatafeeds.fundfeedsjqdata import AFundQuotationJqData
 from datafeeds.jqdatafeeds.fundfeedsjqdata import AFundDayVarsJqData
+from datafeeds.windclientfeeds.fundfeedswindclient import AFundIndustryWindClient
 
 
 class AFundQuotation:
@@ -85,3 +86,40 @@ class AFundDayVars:
         else:
             log.warning("%s did't get data, please check it " % date_datetime)
         return data
+    
+    
+class AFundIndustry:
+    
+    @staticmethod
+    def get_track_industry(securityIds, date_datetime, dataSource=None):
+        log = logger.get_logger(name="AFundIndustry")
+        if not isinstance(securityIds, list):
+            raise BaseException("[AFundIndustry] securityIds must be list")
+        for securityId in securityIds:
+            if not isinstance(securityId, str):
+                raise BaseException("[AFundIndustry] securityId in securityIds must be str")
+        if not isinstance(date_datetime, datetime.datetime):
+            raise BaseException("[AFundIndustry] date_datetime must be datetime.datetime")
+        if dataSource is None:
+            dataSource = BarFeedConfig.get_client_config().get("AFundIndustry")
+            log.info("dataSource did't allocated, so we use init config: %s" % dataSource)
+        if dataSource == "windclient":
+            data = AFundIndustryWindClient().get_wind_industry(securityIds=securityIds, date_datetime=date_datetime)
+        else:
+            raise BaseException("[AFundIndustry] dataSource: %s can't supply now" % dataSource)
+        if not data.empty:
+            data.sort_values(by="securityId", axis=0, ascending=True, inplace=True)
+            data.reset_index(drop=True, inplace=True)
+            data.loc[:, "dateSource"] = dataSource
+        else:
+            log.warning("%s did't get data, please check it " % securityIds)
+        return data
+    
+    
+    
+    
+    
+    
+    
+    
+    
