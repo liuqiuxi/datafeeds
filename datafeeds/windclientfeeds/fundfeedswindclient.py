@@ -42,7 +42,7 @@ class AFundQuotationWindClient(BaseWindClient):
             data1 = pd.DataFrame({"securityId": securityId, "dateTime": data0.Times})
             for i in range(len(data0.Fields)):
                 data1.loc[:, data0.Fields[i].lower()] = data0.Data[i]
-            data = data.append(data1)
+            data = pd.concat(objs=[data, data1], axis=0, join="outer")
         rename_dict = BarFeedConfig.get_windclient_items().get(self.LOGGER_NAME)
         data.rename(columns=rename_dict, inplace=True)
         log = logger.get_logger(name=self.LOGGER_NAME)
