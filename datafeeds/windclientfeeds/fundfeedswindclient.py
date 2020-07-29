@@ -18,6 +18,7 @@ class AFundQuotationWindClient(BaseWindClient):
         super(AFundQuotationWindClient, self).__init__()
         self.__adjust_name_dict = {"F": "PriceAdj=F", "B": "PriceAdj=B"}
         self.__items = {"preClose": "pre_close", "amount": "amt"}
+        
         self.__logger = logger.get_logger(name=self.LOGGER_NAME)
         
     def get_quotation(self, securityIds, items, frequency, begin_datetime, end_datetime, adjusted=None):
@@ -41,7 +42,7 @@ class AFundQuotationWindClient(BaseWindClient):
             data1 = pd.DataFrame({"securityId": securityId, "dateTime": data0.Times})
             for i in range(len(data0.Fields)):
                 data1.loc[:, data0.Fields[i].lower()] = data0.Data[i]
-            data = pd.concat(objs=[data, data1], axis=0, join="outer")
+            data = data.append(data1)
         rename_dict = BarFeedConfig.get_windclient_items().get(self.LOGGER_NAME)
         data.rename(columns=rename_dict, inplace=True)
         log = logger.get_logger(name=self.LOGGER_NAME)
@@ -57,7 +58,26 @@ class AFundQuotationWindClient(BaseWindClient):
         data = data.loc[:, ["dateTime", "securityId"] + real_items].copy(deep=True)
         connect.stop()
         return data
-                
+    
+    
+class AFundIndustryWindClient(BaseWindClient):
+    LOGGER_NAME = "AFundIndustryWindClient"
+
+    def __init__(self):
+        super(AFundIndustryWindClient, self).__init__()      
+        
+    def get_fund_track(self, securityIds, date_datetime):
+        connect = self.connect()
+        instruments = ""
+        for securityId in securityIds:
+            instruments = instruments + securityId + ","
+        instruments = instruments[:-1]
+        data = connect.wss(codes=instruments, fields="fund_trackindexcode")
+        data = pd.DataFrame({"securityId": data.Codes, "industryName": data.Data[0]})
+        data.loc[:, "dateTime"] = date_datetime
+        connect.stop()
+        return data
+        
                 
             
         
