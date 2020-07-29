@@ -75,7 +75,8 @@ class BarFeedConfig:
                   "AShareIndustry": "windclient",
                   "AShareIPO": "wind",
                   "AShareDayVars": "wind",
-                  "AFundDayVars": "jqdata"
+                  "AFundDayVars": "jqdata",
+                  "AFundIndustry": "windclient"
                   }
         return config
 
